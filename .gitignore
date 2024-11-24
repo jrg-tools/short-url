@@ -1,0 +1,25 @@
+out
+.envrc
+/.env
+/.idea
+
+.vscode
+.DS_Store
+
+# Secret should not be committed without encryption.
+**/Secret/*.yaml
+**/Secret/*.yml
+**/secret/*.yaml
+**/secret/*.yml
+
+# Go
+vendor/
+bin/
+release/
+
+# CUE
+*_tool.cue
+debug_values.cue
+
+local.db*
+local.sqlite3*
