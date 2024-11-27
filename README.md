@@ -22,6 +22,5 @@ To authenticate use a signature ssh key. The key must be added to the repository
 .
 ├── db # SQLite3 schema for short URLs and SSH Auth
 ├── docs # Documentation for the DB schema
-├── src # Source code
-└── tf # Terraform files for infrastructure and deployment
+└── src # Source code
 ```

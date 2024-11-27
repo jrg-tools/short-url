@@ -9,7 +9,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
-  - package-ecosystem: gomod
-    directory: /
+
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
       interval: 'monthly'
