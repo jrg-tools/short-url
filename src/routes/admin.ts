@@ -11,6 +11,7 @@ const admin = new Hono()
 
   .post('/', zValidator('json', originUrlSchema), async (c) => {
     const body = await c.req.json();
+
     return c.json({ createShortUrlFor: body });
   })
 
