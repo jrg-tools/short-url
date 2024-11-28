@@ -3,15 +3,26 @@
   "scripts": {
     "dev": "wrangler dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "db:makemigration": "drizzle-kit generate --config=./db/short-url.drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=./db/short-url.drizzle.config.ts",
+    "db:push": "drizzle-kit push --config=./db/short-url.drizzle.config.ts",
+    "db:start": "turso dev --db-file .out/local-short-url.sqlite3",
+    "db:dump": "turso db shell short-url .dump > .out/dump.sql",
+    "db:populate": "turso db shell http://127.0.0.1:8080 < .out/dump.sql",
+    "format": "prettier --check --ignore-path .gitignore .",
+    "format:fix": "prettier --write --ignore-path .gitignore .",
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.1",
+    "@libsql/client": "^0.14.0",
+    "drizzle-orm": "^0.36.4",
     "hono": "^4.6.12"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.0",
-    "@cloudflare/workers-types": "^4.20241112.0",
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "drizzle-kit": "^0.28.1",
     "wrangler": "^3.88.0"
   }
 }
