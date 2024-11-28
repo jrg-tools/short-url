@@ -10,7 +10,7 @@
 | GET | `/{id}` | Redirects to the original URL | Redirect | :o: |
 | POST | `/` *Body:* `{ "original": "string" }` | Creates a new short URL | `{ "short": "string", "original": "string" }` | :x: |
 | DELETE | `/{id}` | Deletes the short URL | `{ "message": "string" }` | :x: |
-| GET | `/search?query={string}` | Returns all short URLs matching the query | `[{ "short": "string", "original": "string", "hits": "number" }]` | :x: |
+| GET | `/search?q={string}` | Returns all short URLs matching the query | `[{ "short": "string", "original": "string", "hits": "number" }]` | :x: |
 
 ## Authentication
 
@@ -23,4 +23,17 @@ To authenticate use a signature ssh key. The key must be added to the repository
 ├── db # SQLite3 schema for short URLs and SSH Auth
 ├── docs # Documentation for the DB schema
 └── src # Source code
+```
+
+## Local development
+
+```
+bun install
+bun dev
+```
+
+## :rocket: Deploy
+
+```
+bun run deploy
 ```

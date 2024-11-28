@@ -1,0 +1,17 @@
+{
+  "name": "short-url",
+  "scripts": {
+    "dev": "wrangler dev",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "deploy": "wrangler deploy --minify"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.1",
+    "hono": "^4.6.12"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.11.0",
+    "@cloudflare/workers-types": "^4.20241112.0",
+    "wrangler": "^3.88.0"
+  }
+}
