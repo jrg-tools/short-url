@@ -4,6 +4,7 @@ import type { SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
+import { AlreadyExists } from '@/routes/errors';
 import { generateAlias } from '@/utils/crypto';
 import { eq, like, or } from 'drizzle-orm';
 
@@ -28,18 +29,30 @@ export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, 
   };
 }
 
-export async function createShortUrl(ctx: Context<{ Bindings: Bindings }>, origin: string): Promise<{ error: unknown; res: ThinShortUrl }> {
+export async function createShortUrl(ctx: Context<{ Bindings: Bindings }>, origin: string): Promise<{ error: unknown; res: ThinShortUrl | null }> {
+  const alias = generateAlias(origin, ctx.env.PRIVATE_KEY!);
   let res: ShortUrl[] = [];
   try {
     res = await db(ctx)
       .insert(shortUrl)
-      .values({ Origin: origin, Alias: generateAlias(origin, ctx.env.PRIVATE_KEY!) })
+      .values({ Origin: origin, Alias: alias })
+      .onConflictDoNothing()
       .returning();
   }
   catch (e) {
     return {
       error: e,
-      res: {} as ThinShortUrl,
+      res: null,
+    };
+  }
+
+  if (res.length === 0) {
+    return {
+      error: AlreadyExists,
+      res: {
+        Alias: alias,
+        Origin: origin,
+      } as ThinShortUrl,
     };
   }
 

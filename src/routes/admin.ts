@@ -1,6 +1,6 @@
 import type { Bindings } from '@/env.d';
-import { createShortUrl, deleteShortUrl, searchShortUrl } from '@/repository/actions';
-import { InternalServerError, NotFound } from '@/routes/errors';
+import { createShortUrl, deleteShortUrl, getOriginUrlByAlias, searchShortUrl } from '@/repository/actions';
+import { AlreadyExists, InternalServerError, NotFound } from '@/routes/errors';
 import { aliasSchema, originUrlSchema, querySchema } from '@/utils/validator';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
@@ -23,6 +23,16 @@ const admin = new Hono<{ Bindings: Bindings }>()
 
     const { error, res } = await createShortUrl(c, body.originUrl);
     if (error) {
+      if (error === AlreadyExists && res) {
+        const { error: e, res: r } = await getOriginUrlByAlias(c, res.Alias);
+        if (e || !r) {
+          return c.json({ message: NotFound }, 400);
+        }
+        return c.json({
+          Alias: r.Alias,
+          OriginUrl: r.Origin,
+        });
+      }
       return c.json({ message: InternalServerError }, 500);
     }
 
