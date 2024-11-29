@@ -4,6 +4,3 @@ main = "src/index.ts"
 minify = true
 
 routes = [{ pattern = "x.jrg.tools", custom_domain = true }]
-
-# [vars]
-# MY_VAR = "my-variable"
