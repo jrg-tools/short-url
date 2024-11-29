@@ -26,6 +26,3 @@ export const shortUrl = sqliteTable(
     };
   },
 );
-
-export type ShortUrl = typeof shortUrl.$inferSelect;
-export type NewShortUrl = typeof shortUrl.$inferInsert;
