@@ -5,9 +5,9 @@ import type { Context } from 'hono';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
 import { generateAlias } from '@/utils/crypto';
-import { eq, or, sql } from 'drizzle-orm';
+import { eq, like, or } from 'drizzle-orm';
 
-export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<{ error: unknown; origin: string }> {
+export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<{ error: unknown; res: ShortUrl | null }> {
   let res: ShortUrl[] = [];
   try {
     res = await db(ctx)
@@ -18,13 +18,13 @@ export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, 
   catch (e) {
     return {
       error: e,
-      origin: '',
+      res: null,
     };
   }
 
   return {
     error: null,
-    origin: res[0].Origin,
+    res: res[0],
   };
 }
 
@@ -73,8 +73,8 @@ export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query
   let res: ShortUrl[] = [];
 
   const filters: SQL[] = [];
-  filters.push(sql`LOWER(${shortUrl.Origin}) LIKE LOWER('%${query}%')`); // if query is a substring of origin
-  filters.push(sql`LOWER(${shortUrl.Alias}) LIKE LOWER('%${query}%')`); // if query is a substring of alias
+  filters.push(like(shortUrl.Origin, `%${query.toLowerCase()}%`)); // if query is a substring of origin
+  filters.push(like(shortUrl.Alias, `%${query}%`)); // if query is a substring of alias
 
   try {
     res = await db(ctx)
@@ -92,5 +92,22 @@ export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query
   return {
     error: null,
     list: res,
+  };
+}
+
+export async function increaseHits(ctx: Context<{ Bindings: Bindings }>, alias: string, hits: number): Promise<{ error: unknown }> {
+  try {
+    await db(ctx)
+      .update(shortUrl)
+      .set({ Hits: hits + 1 })
+      .where(eq(shortUrl.Alias, alias));
+  }
+  catch (e) {
+    return {
+      error: e,
+    };
+  }
+  return {
+    error: null,
   };
 }
