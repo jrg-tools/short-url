@@ -8,9 +8,11 @@ export function db(c: Context<{ Bindings: Bindings }>): LibSQLDatabase {
   return drizzle(
     createClient({
       url: c.env.DATABASE_URL!,
+      // Embedded replicas are facing some issues due to https://x.jrg.tools/BioXOB
+      // url: c.env.DATABASE_URL_REPLICA!,
+      // syncUrl: c.env.DATABASE_URL!,
+      // syncInterval: 60000,
       authToken: c.env.DATABASE_TOKEN,
-      syncInterval: 120,
-      syncUrl: c.env.DATABASE_URL!,
     }),
   );
 }

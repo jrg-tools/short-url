@@ -7,3 +7,4 @@ routes = [{ pattern = "x.jrg.tools", custom_domain = true }]
 
 [vars]
 TRACKING_HITS = false
+DATABASE_URL_REPLICA = "file:local-replica.db"
