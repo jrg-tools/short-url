@@ -4,3 +4,6 @@ main = "src/index.ts"
 minify = true
 
 routes = [{ pattern = "x.jrg.tools", custom_domain = true }]
+
+[vars]
+TRACKING_HITS = false

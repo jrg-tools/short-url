@@ -15,9 +15,11 @@ const open = new Hono<{ Bindings: Bindings }>()
       return c.json({ message: NotFound }, 400);
     }
 
-    const { error: err } = await increaseHits(c, res.Alias, res.Hits);
-    if (err) {
-      return c.json({ message: NotFound }, 400);
+    if (c.env.TRACKING_HITS) {
+      const { error: err } = await increaseHits(c, res.Alias, res.Hits);
+      if (err) {
+        return c.json({ message: NotFound }, 400);
+      }
     }
 
     return c.redirect(res.Origin);

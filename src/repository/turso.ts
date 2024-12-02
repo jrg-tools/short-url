@@ -9,6 +9,8 @@ export function db(c: Context<{ Bindings: Bindings }>): LibSQLDatabase {
     createClient({
       url: c.env.DATABASE_URL!,
       authToken: c.env.DATABASE_TOKEN,
+      syncInterval: 120,
+      syncUrl: c.env.DATABASE_URL!,
     }),
   );
 }
