@@ -59,7 +59,8 @@ const admin = new Hono<{ Bindings: Bindings }>()
       return c.json({ message: NotFound }, 400);
     }
 
-    return c.status(204);
+    c.status(204);
+    return c.body(null);
   });
 
 export default admin;
