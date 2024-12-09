@@ -124,3 +124,26 @@ export async function increaseHits(ctx: Context<{ Bindings: Bindings }>, alias: 
     error: null,
   };
 }
+
+export async function getAllShortUrls(ctx: Context<{ Bindings: Bindings }>, page: number, size: number): Promise<{ error: unknown; list: ShortUrl[] }> {
+  let res: ShortUrl[] = [];
+  try {
+    res = await db(ctx)
+      .select()
+      .from(shortUrl)
+      .orderBy(shortUrl.Origin)
+      .limit(size)
+      .offset((page - 1) * size);
+  }
+  catch (e) {
+    return {
+      error: e,
+      list: [],
+    };
+  }
+
+  return {
+    error: null,
+    list: res,
+  };
+}

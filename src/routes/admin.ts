@@ -1,7 +1,7 @@
 import type { Bindings } from '@/env.d';
-import { createShortUrl, deleteShortUrl, getOriginUrlByAlias, searchShortUrl } from '@/repository/actions';
+import { createShortUrl, deleteShortUrl, getAllShortUrls, getOriginUrlByAlias, searchShortUrl } from '@/repository/actions';
 import { AlreadyExists, InternalServerError, NotFound } from '@/routes/errors';
-import { aliasSchema, originUrlSchema, querySchema } from '@/utils/validator';
+import { aliasSchema, originUrlSchema, paginationSchema, querySchema } from '@/utils/validator';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 
@@ -11,6 +11,18 @@ const admin = new Hono<{ Bindings: Bindings }>()
     const query: string = c.req.query('q')!;
 
     const { error, list } = await searchShortUrl(c, query);
+    if (error) {
+      return c.json({ message: NotFound }, 400);
+    }
+
+    return c.json(list);
+  })
+
+  .get('/list', zValidator('query', paginationSchema), async (c) => {
+    const page: number = +c.req.query('page')!;
+    const size: number = +c.req.query('size')!;
+
+    const { error, list } = await getAllShortUrls(c, page, size);
     if (error) {
       return c.json({ message: NotFound }, 400);
     }
