@@ -1,4 +1,4 @@
-compatibility_date = "2024-11-27"
+compatibility_date = "2024-11-06"
 name = "short-url"
 main = "src/index.ts"
 minify = true
