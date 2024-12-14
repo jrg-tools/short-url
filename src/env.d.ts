@@ -4,4 +4,5 @@ export interface Bindings {
   DATABASE_TOKEN?: string;
   PRIVATE_KEY: string;
   TRACKING_HITS: boolean;
+  TOKEN_SECRET: string;
 }

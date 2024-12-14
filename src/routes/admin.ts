@@ -4,8 +4,13 @@ import { AlreadyExists, InternalServerError, NotFound } from '@/routes/errors';
 import { aliasSchema, originUrlSchema, paginationSchema, querySchema } from '@/utils/validator';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { jwt } from 'hono/jwt';
 
 const admin = new Hono<{ Bindings: Bindings }>()
+  .basePath('/admin')
+  .use('*', async (c, next) => {
+    return jwt({ secret: c.env.TOKEN_SECRET! })(c, next);
+  })
 
   .get('/search', zValidator('query', querySchema), async (c) => {
     const query: string = c.req.query('q')!;
