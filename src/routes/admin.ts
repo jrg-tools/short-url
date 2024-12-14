@@ -35,7 +35,7 @@ const admin = new Hono<{ Bindings: Bindings }>()
     return c.json(list);
   })
 
-  .post('/', zValidator('json', originUrlSchema), async (c) => {
+  .post('/new', zValidator('json', originUrlSchema), async (c) => {
     const body = await c.req.json();
 
     const { error, res } = await createShortUrl(c, body.originUrl);
