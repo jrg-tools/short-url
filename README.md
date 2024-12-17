@@ -8,9 +8,9 @@
 | Method | Endpoint | Description | Response | isPublic |
 | --- | --- | --- | --- | --- |
 | GET | `/{id}` | Redirects to the original URL | Redirect | :o: |
-| POST | `/` *Body:* `{ "original": "string" }` | Creates a new short URL | `{ "short": "string", "original": "string" }` | :x: |
-| DELETE | `/{id}` | Deletes the short URL | `{ "message": "string" }` | :x: |
-| GET | `/search?q={string}` | Returns all short URLs matching the query | `[{ "short": "string", "original": "string", "hits": "number" }]` | :x: |
+| POST | `/ops/new` *Body:* `{ "original": "string" }` | Creates a new short URL | `{ "short": "string", "original": "string" }` | :x: |
+| DELETE | `/ops/{id}` | Deletes the short URL | `{ "message": "string" }` | :x: |
+| GET | `/ops/search?q={string}` | Returns all short URLs matching the query | `[{ "short": "string", "original": "string", "hits": "number" }]` | :x: |
 
 ## Authentication
 

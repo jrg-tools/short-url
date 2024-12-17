@@ -6,8 +6,8 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { jwt } from 'hono/jwt';
 
-const admin = new Hono<{ Bindings: Bindings }>()
-  .basePath('/admin')
+const operations = new Hono<{ Bindings: Bindings }>()
+  .basePath('/ops')
   .use('*', async (c, next) => {
     return jwt({ secret: c.env.TOKEN_SECRET! })(c, next);
   })
@@ -68,4 +68,4 @@ const admin = new Hono<{ Bindings: Bindings }>()
     return c.body(null);
   });
 
-export default admin;
+export default operations;
