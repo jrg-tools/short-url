@@ -1,12 +1,12 @@
-import type { Bindings } from '@/env.d';
-import type { ShortUrl, ThinShortUrl } from '@/models/shortUrl.d';
 import type { SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
+import type { Bindings } from '@/env.d';
+import type { ShortUrl, ThinShortUrl } from '@/models/shortUrl.d';
+import { eq, like, or } from 'drizzle-orm';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
 import { AlreadyExists } from '@/routes/errors';
 import { generateAlias } from '@/utils/crypto';
-import { eq, like, or } from 'drizzle-orm';
 
 export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<{ error: unknown; res: ShortUrl | null }> {
   let res: ShortUrl[] = [];
@@ -82,7 +82,7 @@ export async function deleteShortUrl(ctx: Context<{ Bindings: Bindings }>, alias
   };
 }
 
-export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query: string): Promise<{ error: unknown; list: ShortUrl[] }> {
+export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query: string, page: number = 1, size: number = 10): Promise<{ error: unknown; list: ShortUrl[] }> {
   let res: ShortUrl[] = [];
 
   const filters: SQL[] = [];
@@ -93,7 +93,9 @@ export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query
     res = await db(ctx)
       .select()
       .from(shortUrl)
-      .where(or(...filters));
+      .where(or(...filters))
+      .limit(size)
+      .offset((page - 1) * size);
   }
   catch (e) {
     return {

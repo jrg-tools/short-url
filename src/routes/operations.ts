@@ -1,21 +1,25 @@
 import type { Bindings } from '@/env.d';
-import { createShortUrl, deleteShortUrl, getAllShortUrls, getOriginUrlByAlias, searchShortUrl } from '@/repository/actions';
-import { AlreadyExists, InternalServerError, NotFound } from '@/routes/errors';
-import { aliasSchema, originUrlSchema, paginationSchema, querySchema } from '@/utils/validator';
+import { clerkMiddleware } from '@hono/clerk-auth';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { jwt } from 'hono/jwt';
+import { createShortUrl, deleteShortUrl, getAllShortUrls, getOriginUrlByAlias, searchShortUrl } from '@/repository/actions';
+import { AlreadyExists, InternalServerError, NotFound } from '@/routes/errors';
+import { aliasSchema, originUrlSchema, paginationSchema, querySchema, requireAdmin } from '@/utils/validator';
 
 const operations = new Hono<{ Bindings: Bindings }>()
   .basePath('/ops')
-  .use('*', async (c, next) => {
-    return jwt({ secret: c.env.TOKEN_SECRET! })(c, next);
-  })
+  .use('*', clerkMiddleware())
 
   .get('/search', zValidator('query', querySchema), async (c) => {
-    const query: string = c.req.query('q')!;
+    const check = await requireAdmin(c);
+    if (check !== true)
+      return check;
 
-    const { error, list } = await searchShortUrl(c, query);
+    const query: string = c.req.query('q')!;
+    const page: number = +c.req.query('page')!;
+    const size: number = +c.req.query('size')!;
+
+    const { error, list } = await searchShortUrl(c, query, page, size);
     if (error) {
       return c.json({ message: NotFound }, 400);
     }
@@ -24,6 +28,10 @@ const operations = new Hono<{ Bindings: Bindings }>()
   })
 
   .get('/list', zValidator('query', paginationSchema), async (c) => {
+    const check = await requireAdmin(c);
+    if (check !== true)
+      return check;
+
     const page: number = +c.req.query('page')!;
     const size: number = +c.req.query('size')!;
 
@@ -36,6 +44,10 @@ const operations = new Hono<{ Bindings: Bindings }>()
   })
 
   .post('/new', zValidator('json', originUrlSchema), async (c) => {
+    const check = await requireAdmin(c);
+    if (check !== true)
+      return check;
+
     const body = await c.req.json();
 
     const { error, res } = await createShortUrl(c, body.originUrl);
@@ -57,6 +69,10 @@ const operations = new Hono<{ Bindings: Bindings }>()
   })
 
   .delete('/:id', zValidator('param', aliasSchema), async (c) => {
+    const check = await requireAdmin(c);
+    if (check !== true)
+      return check;
+
     const id: string = c.req.param('id');
 
     const { error } = await deleteShortUrl(c, id);

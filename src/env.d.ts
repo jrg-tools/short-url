@@ -5,4 +5,7 @@ export interface Bindings {
   PRIVATE_KEY: string;
   TRACKING_HITS: boolean;
   TOKEN_SECRET: string;
+  CLERK_SECRET_KEY: string;
+  CLERK_PUBLISHABLE_KEY: string;
+  CLERK_ACCOUNTS_URL: string;
 }

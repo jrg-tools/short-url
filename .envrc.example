@@ -2,3 +2,6 @@ export DATABASE_URL=http://127.0.0.1:8080
 export DATABASE_TOKEN=
 export DATABASE_URL_PROD=libsql://<turso-url>
 export DATABASE_TOKEN_PROD=<turso-token>
+export CLERK_SECRET_KEY=<clerk-secret-key>
+export CLERK_PUBLISHABLE_KEY=<clerk-publishable-key>
+export CLERK_ACCOUNTS_URL=https://<account_sec>.accounts.dev

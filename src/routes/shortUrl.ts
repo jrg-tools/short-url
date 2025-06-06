@@ -1,9 +1,9 @@
 import type { Bindings } from '@/env.d';
+import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
 import { getOriginUrlByAlias, increaseHits } from '@/repository/actions';
 import { NotFound } from '@/routes/errors';
 import { aliasSchema } from '@/utils/validator';
-import { zValidator } from '@hono/zod-validator';
-import { Hono } from 'hono';
 
 const open = new Hono<{ Bindings: Bindings }>()
 

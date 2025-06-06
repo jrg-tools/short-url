@@ -1,6 +1,6 @@
-import type { Bindings } from '@/env.d';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import type { Context } from 'hono';
+import type { Bindings } from '@/env.d';
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 
