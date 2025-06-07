@@ -15,11 +15,9 @@ const operations = new Hono<{ Bindings: Bindings }>()
     if (check !== true)
       return check;
 
-    const query: string = c.req.query('q')!;
-    const page: number = +c.req.query('page')!;
-    const size: number = +c.req.query('size')!;
+    const { q, page, size }: { q: string; page: number; size: number } = c.req.valid('query');
 
-    const { error, list } = await searchShortUrl(c, query, page, size);
+    const { error, list } = await searchShortUrl(c, q, page, size);
     if (error) {
       return c.json({ message: NotFound }, 400);
     }
@@ -32,8 +30,7 @@ const operations = new Hono<{ Bindings: Bindings }>()
     if (check !== true)
       return check;
 
-    const page: number = +c.req.query('page')!;
-    const size: number = +c.req.query('size')!;
+    const { page, size }: { page: number; size: number } = c.req.valid('query');
 
     const { error, list } = await getAllShortUrls(c, page, size);
     if (error) {
@@ -48,9 +45,9 @@ const operations = new Hono<{ Bindings: Bindings }>()
     if (check !== true)
       return check;
 
-    const body = await c.req.json();
+    const { originUrl }: { originUrl: string } = c.req.valid('json');
 
-    const { error, res } = await createShortUrl(c, body.originUrl);
+    const { error, res } = await createShortUrl(c, originUrl);
     if (error) {
       if (error === AlreadyExists && res) {
         const { error: e, res: r } = await getOriginUrlByAlias(c, res.Alias);
@@ -73,7 +70,7 @@ const operations = new Hono<{ Bindings: Bindings }>()
     if (check !== true)
       return check;
 
-    const id: string = c.req.param('id');
+    const { id }: { id: string } = c.req.valid('param');
 
     const { error } = await deleteShortUrl(c, id);
     if (error) {

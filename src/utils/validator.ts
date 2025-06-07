@@ -9,8 +9,8 @@ export const aliasSchema = z.object({
 
 export const querySchema = z.object({
   q: z.string(),
-  page: z.string().min(1).default('1'),
-  size: z.string().min(1).max(100).default('10'),
+  page: z.coerce.number().min(1).default(1),
+  size: z.coerce.number().min(1).max(100).default(10),
 });
 
 export const originUrlSchema = z.object({
@@ -18,14 +18,14 @@ export const originUrlSchema = z.object({
 });
 
 export const paginationSchema = z.object({
-  page: z.string().min(1).default('1'),
-  size: z.string().min(1).max(100).default('10'),
+  page: z.coerce.number().min(1).default(1),
+  size: z.coerce.number().min(1).max(100).default(10),
 });
 
 export const listSchema = z.object({
-  q: z.string().optional(),
-  page: z.string().min(1).default('1'),
-  size: z.string().min(1).max(100).default('10'),
+  q: z.string().optional().default(''),
+  page: z.coerce.number().min(1).default(1),
+  size: z.coerce.number().min(1).max(100).default(10),
 });
 
 export async function requireAdmin(c: Context): Promise<boolean | Response> {
