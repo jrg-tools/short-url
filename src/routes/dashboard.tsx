@@ -23,7 +23,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           <title>URL Shortener Dashboard</title>
           <link rel="icon" href="https://jorgechato.com/favicon.ico" />
           <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-          <script src="https://cdn.tailwindcss.com"></script>
+          <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
           <style>
             {`
               @font-face {
