@@ -100,7 +100,8 @@ export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query
 
     const resCount: { count: number }[] = await db(ctx)
       .select({ count: sql<number>`count(*)` })
-      .from(shortUrl);
+      .from(shortUrl)
+      .where(or(...filters));
 
     count = resCount[0].count;
   }
