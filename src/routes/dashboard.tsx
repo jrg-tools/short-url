@@ -62,7 +62,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                   type="submit"
                   class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
                 >
-                  Shorten
+                  ✂️ Shorten
                 </button>
               </form>
 
@@ -85,7 +85,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                   type="submit"
                   class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
                 >
-                  Search
+                  🔍 Search
                 </button>
               </form>
 
@@ -111,14 +111,31 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 </ul>
               </div>
             </div>
-            <script>
-              {`
+            <script dangerouslySetInnerHTML={{
+              __html: `
     function copyToClipboard(text) {
-      navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text).then(function () {
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.classList.remove('hidden');
+        toast.classList.add('opacity-100');
+        setTimeout(function () {
+          toast.classList.add('opacity-0');
+        }, 1500);
+        setTimeout(function () {
+          toast.classList.add('hidden');
+          toast.classList.remove('opacity-0');
+          toast.classList.remove('opacity-100');
+        }, 2000);
+      });
     }
-  `}
-            </script>
+  `,
+            }}
+            />
           </footer>
+          <div id="toast" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2 bg-white/10 text-white text-sm font-bold rounded shadow transition-opacity duration-500">
+            📋 Copied to clipboard!
+          </div>
         </body>
       </html>,
     );
@@ -178,27 +195,40 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           : (
               <>
                 {list.map((item: any) => (
-                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition">
-                    <div class="flex flex-col min-w-0">
-                      <a class="text-yellow-400 font-semibold text-sm" href={`/${item.Alias}`} target="_blank">
+                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition" id={`X${item.Alias}`}>
+                    <button
+                      class="flex flex-col min-w-0 cursor-pointer text-left w-full h-full"
+                      onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
+                    >
+                      <div class="text-yellow-400 font-semibold text-sm">
                         <span class="text-gray-300">
                           {c.env.DOMAIN}
                           /
                         </span>
                         <span class="ml-1 font-bold text-lg">{item.Alias}</span>
-                      </a>
+                      </div>
                       <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden">{item.Origin}</div>
                       <div class="text-xs text-gray-500">
                         Hits:
                         {item.Hits}
                       </div>
-                    </div>
-                    <div>
-                      <button
-                        class="text-sm px-2 py-1 bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
-                        onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
+                    </button>
+                    <div class="flex gap-4">
+                      <a
+                        class="text-sm px-4 py-4 bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
+                        href={`/${item.Alias}`}
+                        target="_blank"
                       >
-                        Copy
+                        🔗
+                      </a>
+                      <button
+                        class="text-sm px-2 py-1 bg-rose-800 text-white rounded hover:bg-rose-900 transition text-base cursor-pointer"
+                        hx-delete={`/ops/${item.Alias}`}
+                        hx-confirm={`Are you sure you want to delete ${item.Alias}?`}
+                        hx-target={`#X${item.Alias}`}
+                        hx-swap="delete"
+                      >
+                        ☠️
                       </button>
                     </div>
                   </div>

@@ -77,7 +77,7 @@ const operations = new Hono<{ Bindings: Bindings }>()
       return c.json({ message: NotFound }, 400);
     }
 
-    c.status(204);
+    c.status(200);
     return c.body(null);
   });
 
