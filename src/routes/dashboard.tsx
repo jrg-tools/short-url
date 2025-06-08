@@ -60,7 +60,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 />
                 <button
                   type="submit"
-                  class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base"
+                  class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
                 >
                   Shorten
                 </button>
@@ -83,7 +83,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 />
                 <button
                   type="submit"
-                  class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base"
+                  class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
                 >
                   Search
                 </button>
@@ -140,7 +140,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=0A0A0B&color=3f3f46`;
 
     return c.html(
-      <button class="inline-block text-base" onclick={`copyToClipboard('${shortUrl}')`}>
+      <button class="inline-block text-base cursor-pointer" onclick={`copyToClipboard('${shortUrl}')`}>
         <div class="flex flex-col items-center gap-2">
           <img src={qrUrl} alt="QR Code" class="mx-auto aspect-square w-[160px]" />
           <div class="text-yellow-400 font-semibold hover:text-yellow-400 transition">
@@ -195,7 +195,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                     </div>
                     <div>
                       <button
-                        class="text-sm px-2 py-1 bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base"
+                        class="text-sm px-2 py-1 bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
                         onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
                       >
                         Copy
@@ -209,7 +209,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                     hx-get={`/dashboard/list?q=${q}&page=${page - 1}`}
                     hx-target="#url-list"
                     hx-swap="innerHTML"
-                    class={`px-3 py-1 rounded text-base ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
+                    class={`px-3 py-1 rounded text-base cursor-pointer ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
                     disabled={page <= 1}
                   >
                     ← Prev
@@ -217,9 +217,11 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
                   <span>
                     Page
+                    {' '}
                     {page}
                     {' '}
                     of
+                    {' '}
                     {totalPages}
                   </span>
 
@@ -227,7 +229,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                     hx-get={`/dashboard/list?q=${q}&page=${page + 1}`}
                     hx-target="#url-list"
                     hx-swap="innerHTML"
-                    class={`px-3 py-1 rounded text-base ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
+                    class={`px-3 py-1 rounded text-base cursor-pointer ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
                     disabled={page >= totalPages}
                   >
                     Next →

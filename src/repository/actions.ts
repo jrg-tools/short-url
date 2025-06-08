@@ -2,7 +2,7 @@ import type { SQL } from 'drizzle-orm';
 import type { Context } from 'hono';
 import type { Bindings } from '@/env.d';
 import type { ShortUrl, ThinShortUrl } from '@/models/shortUrl.d';
-import { eq, like, or, sql } from 'drizzle-orm';
+import { desc, eq, like, or, sql } from 'drizzle-orm';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
 import { AlreadyExists } from '@/routes/errors';
@@ -145,7 +145,7 @@ export async function getAllShortUrls(ctx: Context<{ Bindings: Bindings }>, page
     res = await db(ctx)
       .select()
       .from(shortUrl)
-      .orderBy(shortUrl.Origin)
+      .orderBy(desc(shortUrl.CreatedAt))
       .limit(size)
       .offset((page - 1) * size);
 
