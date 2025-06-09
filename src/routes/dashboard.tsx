@@ -209,7 +209,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           : (
               <>
                 {list.map((item: any) => (
-                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition w-full">
+                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition w-full" id={`item-${item.Alias}`}>
                     <button
                       class="flex flex-col min-w-0 w-full text-left cursor-pointer"
                       onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
@@ -219,7 +219,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                           {c.env.DOMAIN}
                           /
                         </span>
-                        <span class="ml-1 font-bold text-lg">{item.Alias}</span>
+                        <span class="font-bold text-lg">{item.Alias}</span>
                       </div>
                       <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden w-full">{item.Origin}</div>
                       <div class="text-xs text-gray-500">
@@ -240,7 +240,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                         class="text-sm px-2 py-1 bg-rose-800 text-white rounded hover:bg-rose-900 transition text-base cursor-pointer"
                         hx-delete={`/ops/${item.Alias}`}
                         hx-confirm={`Are you sure you want to delete ${item.Alias}?`}
-                        hx-target={`#X${item.Alias}`}
+                        hx-target={`#item-${item.Alias}`}
                         hx-swap="delete"
                       >
                         ☠️
