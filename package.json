@@ -1,7 +1,7 @@
 {
   "name": "short-url",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --ip 0.0.0.0",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "db:makemigration": "DATABASE_URL=$env.DATABASE_URL_PROD DATABASE_TOKEN=$env.DATABASE_TOKEN_PROD drizzle-kit generate --config=./db/short-url.drizzle.config.ts",
     "db:migrate": "DATABASE_URL=$env.DATABASE_URL_PROD DATABASE_TOKEN=$env.DATABASE_TOKEN_PROD drizzle-kit migrate --config=./db/short-url.drizzle.config.ts",

@@ -50,6 +50,8 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 hx-trigger="submit"
                 hx-target="#short-url-result"
                 hx-swap="innerHTML"
+                hx-indicator="#short-url-loading"
+                hx-on-htmx-before-request="document.querySelector('#short-url-result').innerHTML = ''"
               >
                 <input
                   type="url"
@@ -66,7 +68,19 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 </button>
               </form>
 
-              <div id="short-url-result" class="aspect-square text-center h-[200px] mx-auto my-4"></div>
+              <div class="relative aspect-square text-center h-[200px] mx-auto my-4">
+                <div
+                  id="short-url-loading"
+                  class="htmx-indicator absolute inset-0"
+                >
+                  <div class=" animate-pulse rounded-xl flex flex-col items-center justify-center gap-4 z-10">
+                    <div class="bg-zinc-800 rounded aspect-square w-[160px]"></div>
+                    <div class="h-4 bg-zinc-800 rounded w-50"></div>
+                  </div>
+                </div>
+
+                <div id="short-url-result" class="z-0 relative"></div>
+              </div>
 
               <form
                 class="flex gap-2 bg-zinc-900/70 backdrop-blur-md rounded-xl p-4 shadow"
@@ -195,9 +209,9 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           : (
               <>
                 {list.map((item: any) => (
-                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition" id={`X${item.Alias}`}>
+                  <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition w-full">
                     <button
-                      class="flex flex-col min-w-0 cursor-pointer text-left w-full h-full"
+                      class="flex flex-col min-w-0 w-full text-left cursor-pointer"
                       onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
                     >
                       <div class="text-yellow-400 font-semibold text-sm">
@@ -207,9 +221,10 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                         </span>
                         <span class="ml-1 font-bold text-lg">{item.Alias}</span>
                       </div>
-                      <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden">{item.Origin}</div>
+                      <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden w-full">{item.Origin}</div>
                       <div class="text-xs text-gray-500">
                         Hits:
+                        {' '}
                         {item.Hits}
                       </div>
                     </button>
