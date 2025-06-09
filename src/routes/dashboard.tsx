@@ -103,7 +103,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                 </button>
               </form>
 
-              <div id="url-list" hx-get="/dashboard/list" hx-trigger="load" hx-swap="innerHTML"></div>
+              <div id="url-list" hx-trigger="load" hx-swap="innerHTML"></div>
             </div>
           </main>
 
@@ -156,7 +156,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
   })
 
   .post('/new', zValidator('form', originUrlSchema), async (c) => {
-    const check = await requireAdmin(c);
+    const check = await requireAdmin(c, true);
     if (check !== true)
       return check;
 
@@ -187,7 +187,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
   })
 
   .get('/list', zValidator('query', listSchema), async (c) => {
-    const check = await requireAdmin(c);
+    const check = await requireAdmin(c, true);
     if (check !== true)
       return check;
 

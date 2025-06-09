@@ -66,7 +66,7 @@ const operations = new Hono<{ Bindings: Bindings }>()
   })
 
   .delete('/:id', zValidator('param', aliasSchema), async (c) => {
-    const check = await requireAdmin(c);
+    const check = await requireAdmin(c, true);
     if (check !== true)
       return check;
 
