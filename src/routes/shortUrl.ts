@@ -1,25 +1,25 @@
 import type { Bindings } from '@/env.d';
+import { clerkMiddleware } from '@hono/clerk-auth';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { aliasSchema } from '@/lib/validator';
+import { createFeatureFlagMiddleware } from '@/middleware/featureflag';
 import { getOriginUrlByAlias, increaseHits } from '@/repository/actions';
-import { NotFound } from '@/routes/errors';
-import { aliasSchema } from '@/utils/validator';
 
 const open = new Hono<{ Bindings: Bindings }>()
+  .use('*', clerkMiddleware())
+  .use('*', createFeatureFlagMiddleware())
 
   .get('/:id', zValidator('param', aliasSchema), async (c) => {
     const id: string = c.req.param('id');
 
-    const { error, res } = await getOriginUrlByAlias(c, id);
-    if (error || !res) {
-      return c.json({ message: NotFound }, 400);
-    }
+    const res = await getOriginUrlByAlias(c, id);
 
-    if (c.env.TRACKING_HITS) {
-      const { error: err } = await increaseHits(c, res.Alias, res.Hits);
-      if (err) {
-        return c.json({ message: NotFound }, 400);
-      }
+    const tracking_hits = await c.var.getFeatureFlag('shorturl_track_hits', {
+      defaultValue: false,
+    });
+    if (tracking_hits) {
+      await increaseHits(c, res.Alias, res.Hits);
     }
 
     return c.redirect(res.Origin);
