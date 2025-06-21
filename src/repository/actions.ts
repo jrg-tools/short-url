@@ -3,124 +3,101 @@ import type { Context } from 'hono';
 import type { Bindings } from '@/env.d';
 import type { ShortUrl, ThinShortUrl } from '@/models/shortUrl.d';
 import { desc, eq, like, or, sql } from 'drizzle-orm';
+import { generateAlias } from '@/lib/crypto';
+import { DatabaseError } from '@/lib/errors/types';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
-import { AlreadyExists } from '@/routes/errors';
-import { generateAlias } from '@/utils/crypto';
 
-export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<{ error: unknown; res: ShortUrl | null }> {
-  let res: ShortUrl[] = [];
+export async function getOriginUrlByAlias(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<ShortUrl> {
   try {
-    res = await db(ctx)
+    return await db(ctx)
       .select()
       .from(shortUrl)
-      .where(eq(shortUrl.Alias, alias));
+      .where(eq(shortUrl.Alias, alias))
+      .then(rows => rows[0]);
   }
   catch (e) {
-    return {
-      error: e,
-      res: null,
-    };
+    const msg = e instanceof Error ? e.message : 'Failed to get origin URL by alias';
+    throw DatabaseError.queryFailed(msg);
   }
-
-  return {
-    error: null,
-    res: res[0],
-  };
 }
 
-export async function createShortUrl(ctx: Context<{ Bindings: Bindings }>, origin: string): Promise<{ error: unknown; res: ThinShortUrl | null }> {
+export async function createShortUrl(ctx: Context<{ Bindings: Bindings }>, origin: string): Promise<ThinShortUrl> {
   const alias = generateAlias(origin, ctx.env.PRIVATE_KEY!);
-  let res: ShortUrl[] = [];
-  try {
-    res = await db(ctx)
+  return await db(ctx).transaction(async (tx) => {
+    // First, check if a short URL already exists for this origin
+    const existing = await tx
+      .select()
+      .from(shortUrl)
+      .where(eq(shortUrl.Origin, origin))
+      .limit(1)
+      .then(rows => rows[0]);
+
+    if (existing) {
+      // Return the existing short URL
+      return existing as ThinShortUrl;
+    }
+
+    // If no existing URL found, create a new one
+    const res: ShortUrl = await tx
       .insert(shortUrl)
       .values({ Origin: origin, Alias: alias })
-      .onConflictDoNothing()
-      .returning();
-  }
-  catch (e) {
-    return {
-      error: e,
-      res: null,
-    };
-  }
+      .returning()
+      .then(rows => rows[0]);
 
-  if (res.length === 0) {
-    return {
-      error: AlreadyExists,
-      res: {
-        Alias: alias,
-        Origin: origin,
-      } as ThinShortUrl,
-    };
-  }
+    if (!res) {
+      throw DatabaseError.queryFailed('Failed to create short URL');
+    }
 
-  return {
-    error: null,
-    res: {
-      Alias: res[0].Alias,
-      Origin: res[0].Origin,
-    } as ThinShortUrl,
-  };
+    return res as ThinShortUrl;
+  });
 }
 
-export async function deleteShortUrl(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<{ error: unknown }> {
+export async function deleteShortUrl(ctx: Context<{ Bindings: Bindings }>, alias: string): Promise<void> {
   try {
     await db(ctx)
       .delete(shortUrl)
       .where(eq(shortUrl.Alias, alias));
   }
   catch (e) {
-    return {
-      error: e,
-    };
+    const msg = e instanceof Error ? e.message : 'Failed to delete short URL';
+    throw DatabaseError.queryFailed(msg);
   }
-
-  return {
-    error: null,
-  };
 }
 
-export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query: string, page: number = 1, size: number = 10): Promise<{ error: unknown; list: ShortUrl[]; count: number }> {
-  let res: ShortUrl[] = [];
-  let count: number = 0;
-
+export async function searchShortUrl(ctx: Context<{ Bindings: Bindings }>, query: string, page: number = 1, size: number = 10): Promise<{ list: ShortUrl[]; count: number }> {
   const filters: SQL[] = [];
   filters.push(like(shortUrl.Origin, `%${query.toLowerCase()}%`)); // if query is a substring of origin
   filters.push(like(shortUrl.Alias, `%${query}%`)); // if query is a substring of alias
 
   try {
-    res = await db(ctx)
-      .select()
-      .from(shortUrl)
-      .where(or(...filters))
-      .limit(size)
-      .offset((page - 1) * size);
+    return await db(ctx).transaction(async (tx) => {
+      const res: ShortUrl[] = await tx
+        .select()
+        .from(shortUrl)
+        .where(or(...filters))
+        .limit(size)
+        .offset((page - 1) * size);
 
-    const resCount: { count: number }[] = await db(ctx)
-      .select({ count: sql<number>`count(*)` })
-      .from(shortUrl)
-      .where(or(...filters));
+      const resCount: { count: number } = await tx
+        .select({ count: sql<number>`count(*)` })
+        .from(shortUrl)
+        .where(or(...filters))
+        .then(rows => rows[0]);
 
-    count = resCount[0].count;
+      return {
+        list: res,
+        count: resCount.count,
+      };
+    });
   }
   catch (e) {
-    return {
-      error: e,
-      list: [],
-      count,
-    };
+    const msg = e instanceof Error ? e.message : 'Failed to search short URLs';
+    throw DatabaseError.queryFailed(msg);
   }
-
-  return {
-    error: null,
-    list: res,
-    count,
-  };
 }
 
-export async function increaseHits(ctx: Context<{ Bindings: Bindings }>, alias: string, hits: number): Promise<{ error: unknown }> {
+export async function increaseHits(ctx: Context<{ Bindings: Bindings }>, alias: string, hits: number): Promise<void> {
   try {
     await db(ctx)
       .update(shortUrl)
@@ -128,44 +105,34 @@ export async function increaseHits(ctx: Context<{ Bindings: Bindings }>, alias: 
       .where(eq(shortUrl.Alias, alias));
   }
   catch (e) {
-    return {
-      error: e,
-    };
+    const msg = e instanceof Error ? e.message : 'Failed to increase hits';
+    throw DatabaseError.queryFailed(msg);
   }
-  return {
-    error: null,
-  };
 }
 
-export async function getAllShortUrls(ctx: Context<{ Bindings: Bindings }>, page: number, size: number): Promise<{ error: unknown; list: ShortUrl[]; count: number }> {
-  let res: ShortUrl[] = [];
-  let count: number = 0;
-
+export async function getAllShortUrls(ctx: Context<{ Bindings: Bindings }>, page: number, size: number): Promise<{ list: ShortUrl[]; count: number }> {
   try {
-    res = await db(ctx)
-      .select()
-      .from(shortUrl)
-      .orderBy(desc(shortUrl.CreatedAt))
-      .limit(size)
-      .offset((page - 1) * size);
+    return await db(ctx).transaction(async (tx) => {
+      const res: ShortUrl[] = await tx
+        .select()
+        .from(shortUrl)
+        .orderBy(desc(shortUrl.CreatedAt))
+        .limit(size)
+        .offset((page - 1) * size);
 
-    const resCount: { count: number }[] = await db(ctx)
-      .select({ count: sql<number>`count(*)` })
-      .from(shortUrl);
+      const resCount: { count: number } = await tx
+        .select({ count: sql<number>`count(*)` })
+        .from(shortUrl)
+        .then(rows => rows[0]);
 
-    count = resCount[0].count;
+      return {
+        list: res,
+        count: resCount.count,
+      };
+    });
   }
   catch (e) {
-    return {
-      error: e,
-      list: [],
-      count,
-    };
+    const msg = e instanceof Error ? e.message : 'Failed to get all short URLs';
+    throw DatabaseError.queryFailed(msg);
   }
-
-  return {
-    error: null,
-    list: res,
-    count,
-  };
 }
