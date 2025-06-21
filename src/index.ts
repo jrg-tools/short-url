@@ -1,11 +1,14 @@
 import type { Bindings } from '@/env.d';
 import { Hono } from 'hono';
+import { createErrorHandler } from '@/middleware/error';
+import dashboard from '@/routes/dashboard';
 import monitoring from '@/routes/monitoring';
 import operations from '@/routes/operations';
 import open from '@/routes/shortUrl';
-import dashboard from './routes/dashboard';
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+app.onError(createErrorHandler());
 
 app.route('/', operations);
 app.route('/', dashboard);

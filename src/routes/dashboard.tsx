@@ -173,12 +173,13 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
             </div>
 
             <div id="short-url-result" class="z-0 relative"></div>
+            <div id="short-url-error" class="z-0 relative text-red-500 hidden">❌ Failed to create short URL.</div>
           </div>
 
           <form
             class="flex gap-2 dark:bg-zinc-900/70 bg-zinc-100 backdrop-blur-md rounded-xl p-4 dark:shadow"
             hx-get="/dashboard/list"
-            hx-target="#url-list"
+            hx-target="#url-list-result"
             hx-trigger="submit"
             hx-params="*"
           >
@@ -196,7 +197,8 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
             </button>
           </form>
 
-          <div id="url-list" hx-trigger="load" hx-swap="innerHTML"></div>
+          <div id="url-list-result" hx-trigger="load" hx-swap="innerHTML"></div>
+          <div class="text-red-500 hidden" id="url-list-error">❌ Failed to load data.</div>
         </div>
       </>,
     );
@@ -204,128 +206,118 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
   .post('/new', requireAuth(), zValidator('form', originUrlSchema), async (c) => {
     const { originUrl, theme } = c.req.valid('form');
-    try {
-      const res = await createShortUrl(c, originUrl);
+    const res = await createShortUrl(c, originUrl);
 
-      const shortUrl = `https://${c.env.DOMAIN}/${res?.Alias}`;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=${theme === 'dark' ? '0A0A0B' : 'FAFAFA'}&color=${theme === 'dark' ? '3f3f46' : 'd4d4d8'}`;
+    const shortUrl = `https://${c.env.DOMAIN}/${res?.Alias}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=${theme === 'dark' ? '0A0A0B' : 'FAFAFA'}&color=${theme === 'dark' ? '3f3f46' : 'd4d4d8'}`;
 
-      return c.html(
-        <button class="inline-block text-base cursor-pointer" onclick={`copyToClipboard('${shortUrl}')`}>
-          <div class="flex flex-col items-center gap-2">
-            <img src={qrUrl} alt="QR Code" class="mx-auto aspect-square w-[160px]" />
-            <div class="text-yellow-400 font-semibold hover:text-yellow-400 transition">
-              <span class="text-gray-600 dark:text-gray-300">
-                {c.env.DOMAIN}
-                /
-              </span>
-              <span class="font-bold text-lg">{res?.Alias}</span>
-            </div>
+    return c.html(
+      <button class="inline-block text-base cursor-pointer" onclick={`copyToClipboard('${shortUrl}')`}>
+        <div class="flex flex-col items-center gap-2">
+          <img src={qrUrl} alt="QR Code" class="mx-auto aspect-square w-[160px]" />
+          <div class="text-yellow-400 font-semibold hover:text-yellow-400 transition">
+            <span class="text-gray-600 dark:text-gray-300">
+              {c.env.DOMAIN}
+              /
+            </span>
+            <span class="font-bold text-lg">{res?.Alias}</span>
           </div>
-        </button>,
-      );
-    }
-    catch {
-      return c.html(<div class="text-red-500">❌ Failed to create short URL.</div>);
-    }
+        </div>
+      </button>,
+    );
   })
 
   .get('/list', requireAuth(), zValidator('query', listSchema), async (c) => {
     const { q, page, size }: { q: string; page: number; size: number } = c.req.valid('query');
 
-    try {
-      const { list, count } = !q ? await getAllShortUrls(c, page, size) : await searchShortUrl(c, q, page, size);
+    const { list, count } = !q ? await getAllShortUrls(c, page, size) : await searchShortUrl(c, q, page, size);
 
-      const totalPages = Math.max(1, Math.ceil(count / size));
+    const totalPages = Math.max(1, Math.ceil(count / size));
 
-      return c.html(
-        <div class="rounded-lg bg-zinc-100 dark:bg-zinc-900/70 backdrop-blur-sm dark:shadow">
-          {list.length === 0
-            ? (
-                <div class="p-4 text-gray-400 text-center">No results found.</div>
-              )
-            : (
-                <>
-                  {list.map((item: any) => (
-                    <div class="flex justify-between items-center px-4 py-3 dark:hover:bg-zinc-900  hover:bg-zinc-200/30 transition w-full" id={`item-${item.Alias}`}>
-                      <button
-                        class="flex flex-col min-w-0 w-full text-left cursor-pointer"
-                        onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
-                      >
-                        <div class="text-yellow-400 font-semibold text-sm">
-                          <span class="text-zinc-700 dark:text-gray-300">
-                            {c.env.DOMAIN}
-                            /
-                          </span>
-                          <span class="font-bold text-lg">{item.Alias}</span>
-                        </div>
-                        <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden w-full">{item.Origin}</div>
-                        <div class="text-xs text-gray-500">
-                          Hits:
-                          {' '}
-                          {item.Hits}
-                        </div>
-                      </button>
-                      <div class="flex gap-4">
-                        <a
-                          class="text-sm px-4 py-4 bg-zinc-200 dark:bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
-                          href={`/${item.Alias}`}
-                          target="_blank"
-                        >
-                          🔗
-                        </a>
-                        <button
-                          class="text-sm px-2 py-1 bg-red-600 dark:bg-rose-800 text-white rounded hover:bg-red-700 dark:hover:bg-rose-900 transition text-base cursor-pointer"
-                          hx-delete={`/ops/${item.Alias}`}
-                          hx-confirm={`Are you sure you want to delete ${item.Alias}?`}
-                          hx-target={`#item-${item.Alias}`}
-                          hx-swap="delete"
-                        >
-                          ☠️
-                        </button>
+    return c.html(
+      <div class="rounded-lg bg-zinc-100 dark:bg-zinc-900/70 backdrop-blur-sm dark:shadow">
+        {list.length === 0
+          ? (
+              <div class="p-4 text-gray-400 text-center">No results found.</div>
+            )
+          : (
+              <>
+                {list.map((item: any) => (
+                  <div class="flex justify-between items-center px-4 py-3 dark:hover:bg-zinc-900  hover:bg-zinc-200/30 transition w-full" id={`item-${item.Alias}`}>
+                    <button
+                      class="flex flex-col min-w-0 w-full text-left cursor-pointer"
+                      onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
+                    >
+                      <div class="text-yellow-400 font-semibold text-sm">
+                        <span class="text-zinc-700 dark:text-gray-300">
+                          {c.env.DOMAIN}
+                          /
+                        </span>
+                        <span class="font-bold text-lg">{item.Alias}</span>
                       </div>
+                      <div class="text-gray-500 text-xs truncate whitespace-nowrap overflow-hidden w-full">{item.Origin}</div>
+                      <div class="text-xs text-gray-500">
+                        Hits:
+                        {' '}
+                        {item.Hits}
+                      </div>
+                    </button>
+                    <div class="flex gap-4">
+                      <a
+                        class="text-sm px-4 py-4 bg-zinc-200 dark:bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
+                        href={`/${item.Alias}`}
+                        target="_blank"
+                      >
+                        🔗
+                      </a>
+                      <button
+                        class="text-sm px-2 py-1 bg-red-600 dark:bg-rose-800 text-white rounded hover:bg-red-700 dark:hover:bg-rose-900 transition text-base cursor-pointer"
+                        hx-delete={`/ops/${item.Alias}`}
+                        hx-confirm={`Are you sure you want to delete ${item.Alias}?`}
+                        hx-target={`#item-${item.Alias}`}
+                        hx-swap="delete"
+                      >
+                        ☠️
+                      </button>
                     </div>
-                  ))}
-
-                  <div class="flex justify-between items-center px-4 py-3 text-sm text-gray-400 bg-zinc-100 dark:bg-zinc-900">
-                    <button
-                      hx-get={`/dashboard/list?q=${q}&page=${page - 1}`}
-                      hx-target="#url-list"
-                      hx-swap="innerHTML"
-                      class={`px-3 py-1 rounded text-base cursor-pointer ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
-                      disabled={page <= 1}
-                    >
-                      ← Prev
-                    </button>
-
-                    <span>
-                      Page
-                      {' '}
-                      {page}
-                      {' '}
-                      of
-                      {' '}
-                      {totalPages}
-                    </span>
-
-                    <button
-                      hx-get={`/dashboard/list?q=${q}&page=${page + 1}`}
-                      hx-target="#url-list"
-                      hx-swap="innerHTML"
-                      class={`px-3 py-1 rounded text-base cursor-pointer ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
-                      disabled={page >= totalPages}
-                    >
-                      Next →
-                    </button>
                   </div>
-                </>
-              )}
-        </div>,
-      );
-    }
-    catch {
-      return c.html(<div class="text-red-500">❌ Failed to load data.</div>);
-    }
+                ))}
+
+                <div class="flex justify-between items-center px-4 py-3 text-sm text-gray-400 bg-zinc-100 dark:bg-zinc-900">
+                  <button
+                    hx-get={`/dashboard/list?q=${q}&page=${page - 1}`}
+                    hx-target="#url-list-result"
+                    hx-swap="innerHTML"
+                    class={`px-3 py-1 rounded text-base cursor-pointer ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
+                    disabled={page <= 1}
+                  >
+                    ← Prev
+                  </button>
+
+                  <span>
+                    Page
+                    {' '}
+                    {page}
+                    {' '}
+                    of
+                    {' '}
+                    {totalPages}
+                  </span>
+
+                  <button
+                    hx-get={`/dashboard/list?q=${q}&page=${page + 1}`}
+                    hx-target="#url-list-result"
+                    hx-swap="innerHTML"
+                    class={`px-3 py-1 rounded text-base cursor-pointer ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
+                    disabled={page >= totalPages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </>
+            )}
+      </div>,
+    );
   });
 
 export default dashboard;
