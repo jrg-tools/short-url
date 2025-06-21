@@ -1,9 +1,13 @@
 export DATABASE_URL=http://127.0.0.1:8080
 export DATABASE_TOKEN=
 
+export PRIVATE_KEY=<private-key>
+
 export CLERK_SECRET_KEY=<clerk-secret-key>
 export CLERK_PUBLISHABLE_KEY=<clerk-publishable-key>
 export CLERK_ACCOUNTS_URL=https://<account_sec>.accounts.dev
 
+export POSTHOG_PUBLIC_KEY=""
+export POSTHOG_HOST=""
+
 export DOMAIN=x.jrg.tools
-export PRIVATE_KEY=<private-key>
