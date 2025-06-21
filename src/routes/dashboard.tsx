@@ -16,7 +16,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
     if (!c.req.header('hx-request')) {
       return jsxRenderer(({ children }) => (
-        <html lang="en" class="bg-zinc-950 text-white" style={{ fontFamily: '\'Inter Variable\', sans-serif' }}>
+        <html lang="en" class="bg-zinc-50 text-black dark:bg-zinc-950 dark:text-white">
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -49,10 +49,10 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
               {children}
             </main>
 
-            <footer class="bg-zinc-900/30 w-full text-sm text-gray-400 mt-10">
+            <footer class="bg-zinc-100/60 dark:bg-zinc-900/30 w-full text-sm text-zinc-600 dark:text-gray-400 mt-10">
               <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-10 text-center md:text-left">
                 <div>
-                  <h4 class="text-white font-semibold mb-2 tracking-tight">FOLLOW MY WORK AT</h4>
+                  <h4 class="text-black dark:text-white font-semibold mb-2 tracking-tight">FOLLOW MY WORK AT</h4>
                   <ul class="space-y-1">
                     <li><a class="hover:text-white transition" href="https://github.com/jorgechato" target="_blank">GitHub</a></li>
                     <li><a class="hover:text-white transition" href="https://www.linkedin.com/in/jorgechato" target="_blank">LinkedIn</a></li>
@@ -60,7 +60,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                   </ul>
                 </div>
                 <div>
-                  <h4 class="text-white font-semibold mb-2 tracking-tight">SITE MAP</h4>
+                  <h4 class="text-black dark:text-white font-semibold mb-2 tracking-tight">SITE MAP</h4>
                   <ul class="space-y-1">
                     <li><a class="hover:text-white transition" href="/">Home</a></li>
                     <li><a class="hover:text-white transition" href="https://accounts.jrg.tools/user">Account</a></li>
@@ -112,7 +112,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
               }}
               />
             </footer>
-            <div id="toast" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2 bg-white/10 text-white text-sm font-bold rounded shadow transition-opacity duration-500">
+            <div id="toast" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2 bg-zinc-100 dark:bg-white/10 text-black dark:text-white text-sm font-bold rounded shadow transition-opacity duration-500">
               📋 Copied to clipboard!
             </div>
           </body>
@@ -132,7 +132,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
         <div class="mt-12 space-y-10">
           <form
-            class="flex items-center gap-4 bg-zinc-900/70 backdrop-blur-md rounded-xl p-4 shadow"
+            class="flex items-center gap-4 bg-zinc-100 dark:bg-zinc-900/70 backdrop-blur-md rounded-xl p-4 dark:shadow"
             hx-post="/dashboard/new"
             hx-trigger="submit"
             hx-target="#short-url-result"
@@ -144,12 +144,18 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
               type="url"
               name="originUrl"
               placeholder="https://example.com/your-long-url"
-              class="flex-1 bg-transparent text-white placeholder-zinc-400 focus:outline-none text-sm text-base"
+              class="flex-1 bg-transparent text-black placeholder-zinc-600 dark:text-white dark:placeholder-zinc-400 focus:outline-none text-sm text-base"
               required
             />
+            <input type="hidden" name="theme" id="theme-input" value="light" />
             <button
               type="submit"
-              class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
+              class="bg-zinc-200 dark:bg-zinc-950 text-black dark:text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
+              onclick="
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.getElementById('theme-input').value = isDark ? 'dark' : 'light';
+    "
             >
               ✂️ Shorten
             </button>
@@ -161,8 +167,8 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
               class="htmx-indicator absolute inset-0"
             >
               <div class=" animate-pulse rounded-xl flex flex-col items-center justify-center gap-4 z-10">
-                <div class="bg-zinc-800 rounded aspect-square w-[160px]"></div>
-                <div class="h-4 bg-zinc-800 rounded w-50"></div>
+                <div class="bg-zinc-200 dark:bg-zinc-800 rounded aspect-square w-[160px]"></div>
+                <div class="h-4 dark:bg-zinc-800 bg-zinc-200 rounded w-50"></div>
               </div>
             </div>
 
@@ -170,7 +176,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           </div>
 
           <form
-            class="flex gap-2 bg-zinc-900/70 backdrop-blur-md rounded-xl p-4 shadow"
+            class="flex gap-2 dark:bg-zinc-900/70 bg-zinc-100 backdrop-blur-md rounded-xl p-4 dark:shadow"
             hx-get="/dashboard/list"
             hx-target="#url-list"
             hx-trigger="submit"
@@ -180,11 +186,11 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
               type="search"
               name="q"
               placeholder="Search..."
-              class="flex-1 bg-transparent text-white placeholder-zinc-400 focus:outline-none text-sm text-base"
+              class="flex-1 bg-transparent text-black dark:text-white placeholder-zinc-600 dark:placeholder-zinc-400 focus:outline-none text-sm text-base"
             />
             <button
               type="submit"
-              class="bg-zinc-950 text-white font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
+              class="bg-zinc-200 dark:bg-zinc-950 dark:text-white text-black font-semibold px-4 py-1.5 rounded hover:bg-yellow-500 hover:text-black transition text-base cursor-pointer"
             >
               🔍 Search
             </button>
@@ -197,19 +203,19 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
   })
 
   .post('/new', requireAuth(), zValidator('form', originUrlSchema), async (c) => {
-    const { originUrl } = c.req.valid('form');
+    const { originUrl, theme } = c.req.valid('form');
     try {
       const res = await createShortUrl(c, originUrl);
 
       const shortUrl = `https://${c.env.DOMAIN}/${res?.Alias}`;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=0A0A0B&color=3f3f46`;
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=${theme === 'dark' ? '0A0A0B' : 'FAFAFA'}&color=${theme === 'dark' ? '3f3f46' : 'd4d4d8'}`;
 
       return c.html(
         <button class="inline-block text-base cursor-pointer" onclick={`copyToClipboard('${shortUrl}')`}>
           <div class="flex flex-col items-center gap-2">
             <img src={qrUrl} alt="QR Code" class="mx-auto aspect-square w-[160px]" />
             <div class="text-yellow-400 font-semibold hover:text-yellow-400 transition">
-              <span class="text-gray-300">
+              <span class="text-gray-600 dark:text-gray-300">
                 {c.env.DOMAIN}
                 /
               </span>
@@ -233,7 +239,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
       const totalPages = Math.max(1, Math.ceil(count / size));
 
       return c.html(
-        <div class="rounded-lg bg-zinc-900/70 backdrop-blur-sm shadow">
+        <div class="rounded-lg bg-zinc-100 dark:bg-zinc-900/70 backdrop-blur-sm dark:shadow">
           {list.length === 0
             ? (
                 <div class="p-4 text-gray-400 text-center">No results found.</div>
@@ -241,13 +247,13 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
             : (
                 <>
                   {list.map((item: any) => (
-                    <div class="flex justify-between items-center px-4 py-3 hover:bg-zinc-900 transition w-full" id={`item-${item.Alias}`}>
+                    <div class="flex justify-between items-center px-4 py-3 dark:hover:bg-zinc-900  hover:bg-zinc-200/30 transition w-full" id={`item-${item.Alias}`}>
                       <button
                         class="flex flex-col min-w-0 w-full text-left cursor-pointer"
                         onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
                       >
                         <div class="text-yellow-400 font-semibold text-sm">
-                          <span class="text-gray-300">
+                          <span class="text-zinc-700 dark:text-gray-300">
                             {c.env.DOMAIN}
                             /
                           </span>
@@ -262,14 +268,14 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                       </button>
                       <div class="flex gap-4">
                         <a
-                          class="text-sm px-4 py-4 bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
+                          class="text-sm px-4 py-4 bg-zinc-200 dark:bg-zinc-950 text-white rounded hover:bg-white hover:text-black transition text-base cursor-pointer"
                           href={`/${item.Alias}`}
                           target="_blank"
                         >
                           🔗
                         </a>
                         <button
-                          class="text-sm px-2 py-1 bg-rose-800 text-white rounded hover:bg-rose-900 transition text-base cursor-pointer"
+                          class="text-sm px-2 py-1 bg-red-600 dark:bg-rose-800 text-white rounded hover:bg-red-700 dark:hover:bg-rose-900 transition text-base cursor-pointer"
                           hx-delete={`/ops/${item.Alias}`}
                           hx-confirm={`Are you sure you want to delete ${item.Alias}?`}
                           hx-target={`#item-${item.Alias}`}
@@ -281,12 +287,12 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                     </div>
                   ))}
 
-                  <div class="flex justify-between items-center px-4 py-3 text-sm text-gray-400 bg-zinc-900">
+                  <div class="flex justify-between items-center px-4 py-3 text-sm text-gray-400 bg-zinc-100 dark:bg-zinc-900">
                     <button
                       hx-get={`/dashboard/list?q=${q}&page=${page - 1}`}
                       hx-target="#url-list"
                       hx-swap="innerHTML"
-                      class={`px-3 py-1 rounded text-base cursor-pointer ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
+                      class={`px-3 py-1 rounded text-base cursor-pointer ${page <= 1 ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
                       disabled={page <= 1}
                     >
                       ← Prev
@@ -306,7 +312,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                       hx-get={`/dashboard/list?q=${q}&page=${page + 1}`}
                       hx-target="#url-list"
                       hx-swap="innerHTML"
-                      class={`px-3 py-1 rounded text-base cursor-pointer ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-950 hover:bg-white/80 hover:text-black transition'}`}
+                      class={`px-3 py-1 rounded text-base cursor-pointer ${page >= totalPages ? 'transparent cursor-not-allowed' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-950 dark:hover:bg-white/80 hover:text-black transition'}`}
                       disabled={page >= totalPages}
                     >
                       Next →

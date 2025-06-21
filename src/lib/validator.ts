@@ -1,8 +1,4 @@
-import type { Context } from 'hono';
-import { getAuth } from '@hono/clerk-auth';
-import { decodeJwt } from 'jose';
 import { z } from 'zod';
-import { Unauthorized } from '@/routes/errors';
 
 export const aliasSchema = z.object({
   id: z.string().length(6),
@@ -16,6 +12,7 @@ export const querySchema = z.object({
 
 export const originUrlSchema = z.object({
   originUrl: z.string().url(),
+  theme: z.enum(['light', 'dark']).default('dark'),
 });
 
 export const paginationSchema = z.object({
