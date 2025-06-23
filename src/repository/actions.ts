@@ -17,8 +17,7 @@ export async function getOriginUrlByAlias(ctx: Context, alias: string): Promise<
       .then(rows => rows[0]);
   }
   catch (e) {
-    const msg = e instanceof Error ? e.message : 'Failed to get origin URL by alias';
-    throw DatabaseError.queryFailed(msg);
+    throw DatabaseError.fromError(e);
   }
 }
 
@@ -61,8 +60,7 @@ export async function deleteShortUrl(ctx: Context, alias: string): Promise<void>
       .where(eq(shortUrl.Alias, alias));
   }
   catch (e) {
-    const msg = e instanceof Error ? e.message : 'Failed to delete short URL';
-    throw DatabaseError.queryFailed(msg);
+    throw DatabaseError.fromError(e);
   }
 }
 
@@ -93,8 +91,7 @@ export async function searchShortUrl(ctx: Context, query: string, page: number =
     });
   }
   catch (e) {
-    const msg = e instanceof Error ? e.message : 'Failed to search short URLs';
-    throw DatabaseError.queryFailed(msg);
+    throw DatabaseError.fromError(e);
   }
 }
 
@@ -106,8 +103,7 @@ export async function increaseHits(ctx: Context, alias: string, hits: number): P
       .where(eq(shortUrl.Alias, alias));
   }
   catch (e) {
-    const msg = e instanceof Error ? e.message : 'Failed to increase hits';
-    throw DatabaseError.queryFailed(msg);
+    throw DatabaseError.fromError(e);
   }
 }
 
@@ -133,7 +129,6 @@ export async function getAllShortUrls(ctx: Context, page: number, size: number):
     });
   }
   catch (e) {
-    const msg = e instanceof Error ? e.message : 'Failed to get all short URLs';
-    throw DatabaseError.queryFailed(msg);
+    throw DatabaseError.fromError(e);
   }
 }

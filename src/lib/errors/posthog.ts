@@ -19,21 +19,6 @@ export class ErrorTracker {
   }
 
   async trackError(error: TrackableError, distinctId: string = 'system') {
-    const errorData = {
-      errorCode: error.errorCode,
-      errorType: error.constructor.name,
-      message: error.message,
-      severity: error.severity,
-      statusCode: error.status,
-      context: error.context,
-      environment: this.environment,
-      method: this.c.req.method,
-      path: this.c.req.path,
-      url: this.c.req.url,
-      timestamp: new Date().toISOString(),
-      service: SERVICE_NAME,
-    };
-
     // Track error using shared PostHog service
     PostHogService.capture({
       distinctId,
@@ -54,14 +39,5 @@ export class ErrorTracker {
         environment: this.environment,
       },
     });
-
-    // Development logging
-    if (this.environment === 'development') {
-      console.error('🚨 [ERROR TRACKED]', {
-        ...errorData,
-        distinctId,
-        note: 'This would be sent to PostHog in production',
-      });
-    }
   }
 }

@@ -1,7 +1,7 @@
 import { HTTPException } from 'hono/http-exception';
 
 export type Severity = 'low' | 'medium' | 'high';
-export type ErrorStatusCode = 400 | 401 | 402 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503;
+export type ErrorStatusCode = 400 | 401 | 402 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503 | 504;
 
 export abstract class TrackableError extends HTTPException {
   abstract readonly severity: Severity;
@@ -65,19 +65,72 @@ export class DatabaseError extends TrackableError {
   readonly severity = 'high' as const;
   readonly errorCode = 'DATABASE_ERROR';
 
-  static connectionFailed() {
-    return new DatabaseError(
-      503,
-      'Service temporarily unavailable',
-      { reason: 'connection_failed' },
+  static readonly connectionErrorMessages: string[] = [
+    'connection refused',
+    'connection failed',
+    'connection lost',
+    'connection closed',
+    'econnrefused',
+    'network error',
+    'database is locked',
+  ];
+
+  static readonly timeoutErrorMessages: string[] = [
+    'timeout',
+    'etimedout',
+    'connection timeout',
+    'query timeout',
+    'operation timeout',
+    'request timeout',
+    'timed out',
+  ];
+
+  private static matchesErrorPatterns(error: unknown, patterns: string[]): boolean {
+    if (!(error instanceof Error))
+      return false;
+
+    const errorMessage = error.message.toLowerCase();
+    const cause = (error as any).cause;
+    const causeMessage = cause?.message?.toLowerCase() || '';
+
+    return patterns.some(pattern =>
+      errorMessage.includes(pattern) || causeMessage.includes(pattern),
     );
   }
 
-  static queryFailed(query?: string) {
+  static fromError(error: unknown): DatabaseError {
+    const msg = error instanceof Error ? error.message : 'Database operation failed';
+
+    if (DatabaseError.matchesErrorPatterns(error, DatabaseError.timeoutErrorMessages)) {
+      return DatabaseError.timeout(msg);
+    }
+    if (DatabaseError.matchesErrorPatterns(error, DatabaseError.connectionErrorMessages)) {
+      return DatabaseError.connectionFailed(msg);
+    }
+    return DatabaseError.queryFailed(msg);
+  }
+
+  static connectionFailed(details?: string) {
+    return new DatabaseError(
+      503,
+      'Database connection failed',
+      { reason: 'connection_failed', details },
+    );
+  }
+
+  static queryFailed(details?: string) {
     return new DatabaseError(
       500,
-      'Internal Server Error',
-      { query, reason: 'query_failed' },
+      'Database query failed',
+      { reason: 'query_failed', details },
+    );
+  }
+
+  static timeout(operation?: string) {
+    return new DatabaseError(
+      504,
+      'Database operation timed out',
+      { reason: 'timeout', operation },
     );
   }
 }

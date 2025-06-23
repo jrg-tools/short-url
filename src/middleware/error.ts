@@ -17,10 +17,6 @@ export function createErrorHandler(options?: ErrorHandlerOptions) {
     const isProduction = isProd(c);
     const isDevelopment = isDev(c);
 
-    if (isDevelopment) {
-      console.error('[ErrorHandler] Handling error:', err);
-    }
-
     // Call custom error handler if provided
     if (options?.onError) {
       await options.onError(err, c);
