@@ -6,7 +6,7 @@ export const Layout: FC = (props) => {
     <html lang="en" class="bg-zinc-50 text-black dark:bg-zinc-950 dark:text-white">
       <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>
           {props.title}
           {' '}

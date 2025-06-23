@@ -14,3 +14,7 @@ export interface Bindings {
   POSTHOG_PUBLIC_KEY: string;
   POSTHOG_HOST: string;
 }
+
+export interface Variables {
+  userId: string;
+}
