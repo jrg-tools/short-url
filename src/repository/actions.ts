@@ -8,12 +8,16 @@ import { DatabaseError } from '@/lib/errors/types';
 import { shortUrl } from '@/models/shortUrl';
 import { db } from '@/repository/turso';
 
-export async function getOriginUrlByAlias(ctx: Context, alias: string): Promise<ShortUrl> {
+export async function getOriginUrlByAlias(ctx: Context, alias: string): Promise<ThinShortUrl> {
   try {
     return await db(ctx)
-      .select()
+      .select({
+        Alias: shortUrl.Alias,
+        Origin: shortUrl.Origin,
+      })
       .from(shortUrl)
       .where(eq(shortUrl.Alias, alias))
+      .limit(1)
       .then(rows => rows[0]);
   }
   catch (e) {
