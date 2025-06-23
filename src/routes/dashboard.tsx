@@ -7,6 +7,11 @@ import { jsxRenderer } from 'hono/jsx-renderer';
 import { listSchema, originUrlSchema } from '@/lib/validator';
 import { requireAuth } from '@/middleware/auth';
 import { createShortUrl, getAllShortUrls, searchShortUrl } from '@/repository/actions';
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
+import { Layout } from '@/components/layout';
+
+const TITLE = 'X - Short URL';
 
 const dashboard = new Hono<{ Bindings: Bindings }>()
   .basePath('/dashboard')
@@ -16,107 +21,20 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
     if (!c.req.header('hx-request')) {
       return jsxRenderer(({ children }) => (
-        <html lang="en" class="bg-zinc-50 text-black dark:bg-zinc-950 dark:text-white">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-            <title>URL Shortener Dashboard</title>
-            <link rel="icon" href="https://jorgechato.com/favicon.ico" />
-            <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-            <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-            <script
-              async
-              crossorigin="anonymous"
-              data-clerk-publishable-key={CLERK_PUBLISHABLE_KEY}
-              src={`${CLERK_ACCOUNTS_URL}/npm/@clerk/clerk-js@5/dist/clerk.browser.js`}
-              type="text/javascript"
-            >
-            </script>
-            <style>
-              {`
-              @font-face {
-                font-family: 'Inter Variable';
-                font-style: normal;
-                font-display: auto;
-                font-weight: 100 900;
-                src: url(https://cdn.jsdelivr.net/fontsource/fonts/inter:vf@latest/latin-wght-normal.woff2) format('woff2-variations');
-              }
-            `}
-            </style>
-          </head>
-          <body class="min-h-screen flex flex-col justify-between items-center">
-            <main class="w-full max-w-3xl p-6">
-              {children}
-            </main>
-
-            <footer class="bg-zinc-100/60 dark:bg-zinc-900/30 w-full text-sm text-zinc-600 dark:text-gray-400 mt-10">
-              <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-10 text-center md:text-left">
-                <div>
-                  <h4 class="text-black dark:text-white font-semibold mb-2 tracking-tight">FOLLOW MY WORK AT</h4>
-                  <ul class="space-y-1">
-                    <li><a class="hover:text-white transition" href="https://github.com/jorgechato" target="_blank">GitHub</a></li>
-                    <li><a class="hover:text-white transition" href="https://www.linkedin.com/in/jorgechato" target="_blank">LinkedIn</a></li>
-                    <li><a class="hover:text-white transition" href="https://x.com/jorgechato" target="_blank">X</a></li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 class="text-black dark:text-white font-semibold mb-2 tracking-tight">SITE MAP</h4>
-                  <ul class="space-y-1">
-                    <li><a class="hover:text-white transition" href="/">Home</a></li>
-                    <li><a class="hover:text-white transition" href="https://accounts.jrg.tools/user">Account</a></li>
-                  </ul>
-                </div>
-              </div>
-              <script dangerouslySetInnerHTML={{
-                __html: `
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(function () {
-        var toast = document.getElementById('toast');
-        if (!toast) return;
-        toast.classList.remove('hidden');
-        toast.classList.add('opacity-100');
-        setTimeout(function () {
-          toast.classList.add('opacity-0');
-        }, 1500);
-        setTimeout(function () {
-          toast.classList.add('hidden');
-          toast.classList.remove('opacity-0');
-          toast.classList.remove('opacity-100');
-        }, 2000);
-      });
-    }
-  `,
-              }}
-              />
-              <script dangerouslySetInnerHTML={{
-                __html: `
-              window.addEventListener('load', async function () {
-                await Clerk.load();
-
-                // This is the equivalent of getToken({ skipCache: true })
-                document.body.addEventListener('htmx:configRequest', async function(evt) {
-                    // Get fresh token (equivalent to skipCache: true)
-                    const token = await Clerk.session?.getToken({ skipCache: true });
-
-                    if (token) {
-                      // Add fresh auth header to every HTMX request
-                      evt.detail.headers['Authorization'] = 'Bearer ' + token;
-                    }
-
-                    // Also add cache-busting headers
-                    evt.detail.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-                    evt.detail.headers['Pragma'] = 'no-cache';
-                });
-              });
-            `,
-              }}
-              />
-            </footer>
-            <div id="toast" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2 bg-zinc-100 dark:bg-white/10 text-black dark:text-white text-sm font-bold rounded shadow transition-opacity duration-500">
-              📋 Copied to clipboard!
-            </div>
-          </body>
-        </html>
+      <Layout
+        CLERK_PUBLISHABLE_KEY={CLERK_PUBLISHABLE_KEY}
+        CLERK_ACCOUNTS_URL={CLERK_ACCOUNTS_URL}
+        title={TITLE}
+        >
+        <Header name={TITLE}/>
+        <main class="w-full max-w-3xl p-6">
+          {children}
+        </main>
+        <Footer/>
+        <div id="toast" class="fixed bottom-4 right-4 z-50 hidden px-4 py-2 bg-zinc-100 dark:bg-white/10 text-black dark:text-white text-sm font-bold rounded shadow transition-opacity duration-500">
+          📋 Copied to clipboard!
+        </div>
+      </Layout>
       ))(c, next);
     }
     return next();
@@ -124,13 +42,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
   .get('/', requireAuth(), async (c) => {
     return c.render(
-      <>
-        <div class="mx-auto flex flex-col items-center gap-4 rounded-2xl p-8">
-          <img src="https://jorgechato.com/logo.webp" class="w-24 aspect-square" />
-          <h1 class="text-xl font-semibold tracking-tight">X - URL Shortener</h1>
-        </div>
-
-        <div class="mt-12 space-y-10">
+        <div class="mt-24 space-y-10">
           <form
             class="flex items-center gap-4 bg-zinc-100 dark:bg-zinc-900/70 backdrop-blur-md rounded-xl p-4 dark:shadow"
             hx-post="/dashboard/new"
@@ -199,8 +111,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
           <div id="url-list-result" hx-trigger="load" hx-swap="innerHTML"></div>
           <div class="text-red-500 hidden" id="url-list-error">❌ Failed to load data.</div>
-        </div>
-      </>,
+        </div>,
     );
   })
 
