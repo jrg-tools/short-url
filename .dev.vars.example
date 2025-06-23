@@ -6,7 +6,8 @@ CLERK_SECRET_KEY=
 CLERK_PUBLISHABLE_KEY=
 CLERK_ACCOUNTS_URL=https://<account_sec>.accounts.dev
 
-DOMAIN=localhost:8787
-
 POSTHOG_PUBLIC_KEY=""
 POSTHOG_HOST=""
+
+NODE_ENV="development"
+DOMAIN=localhost:8787

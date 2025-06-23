@@ -6,6 +6,6 @@ minify = true
 routes = [{ pattern = "x.jrg.tools", custom_domain = true }]
 
 [vars]
-TRACKING_HITS = false
+NODE_ENV = "production"
 DATABASE_URL_REPLICA = "file:local-replica.db"
 DOMAIN = "x.jrg.tools"

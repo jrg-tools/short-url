@@ -32,9 +32,8 @@ export class PostHogService {
 
       this.instance = new PostHog(POSTHOG_PUBLIC_KEY, {
         host: POSTHOG_HOST || 'https://app.posthog.com',
-        flushAt: 20,
-        flushInterval: 10000,
-        requestTimeout: 3000,
+        flushAt: 1,
+        flushInterval: 0, // Immediate flush
       });
 
       console.log(`[PostHogService] Initialized for environment: ${this.environment}`);
