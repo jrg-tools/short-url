@@ -21,6 +21,7 @@ const envSchema = z.object({
     .default('https://eu.i.posthog.com'),
 
   NODE_ENV: z.enum(['development', 'testing', 'production']).default('development'),
+  DOMAIN: z.string().default('x.jrg.tools'),
 });
 
 const parsed = envSchema.safeParse(process.env);

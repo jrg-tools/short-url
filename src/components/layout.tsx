@@ -15,7 +15,6 @@ export const Layout: FC = (props) => {
         <link rel="icon" href="https://jorgechato.com/favicon.ico" />
         <script src="https://unpkg.com/htmx.org@2.0.4"></script>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
         <script
           async
           crossorigin="anonymous"
