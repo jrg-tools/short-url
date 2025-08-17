@@ -61,6 +61,5 @@ $ bun run db:prod:push # This will push the migration to the database in product
 
 ## :rocket: Deploy
 
-```sh
-$ bun run deploy
-```
+Automatic deploys for the main branch are set up to deploy to the production environment.
+Deployed to Dokploy through Docker.
