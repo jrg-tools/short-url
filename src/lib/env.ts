@@ -1,30 +1,54 @@
-import type { Context } from 'hono';
-import { env } from 'hono/adapter';
+import process from 'node:process';
+import { z } from 'zod';
 
-export type Environment = 'development' | 'testing' | 'production';
+const envSchema = z.object({
+  DATABASE_URL: z.url('DATABASE_URL must be a valid database connection URL (e.g., postgresql://... or sqlite://...)'),
+  DATABASE_TOKEN: z.string().optional(),
+  DATABASE_PATH: z.url('DATABASE_PATH must be a valid file:// or database URL path'),
+  DATABASE_ENCRYPTION_KEY: z.string().optional(),
 
-export function getEnvironment(c: Context): Environment {
-  const { NODE_ENV } = env(c);
+  PRIVATE_KEY: z.string().min(1, 'PRIVATE_KEY must be a non-empty string'),
 
-  if (NODE_ENV === 'production')
-    return 'production';
-  if (NODE_ENV === 'test' || NODE_ENV === 'testing')
-    return 'testing';
-  return 'development';
+  CLERK_SECRET_KEY: z.string().startsWith('sk_', 'CLERK_SECRET_KEY must start with "sk_" prefix'),
+  CLERK_PUBLISHABLE_KEY: z.string().startsWith('pk_', 'CLERK_PUBLISHABLE_KEY must start with "pk_" prefix'),
+  CLERK_ACCOUNTS_URL: z
+    .url('CLERK_ACCOUNTS_URL must be a valid HTTPS URL')
+    .startsWith('https://', 'CLERK_ACCOUNTS_URL must use HTTPS for security'),
+
+  POSTHOG_PUBLIC_KEY: z.string().optional(),
+  POSTHOG_HOST: z
+    .url('POSTHOG_HOST must be a valid URL when provided')
+    .default('https://eu.i.posthog.com'),
+
+  NODE_ENV: z.enum(['development', 'testing', 'production']).default('development'),
+});
+
+const parsed = envSchema.safeParse(process.env);
+if (!parsed.success) {
+  console.error('❌ Invalid environment variables:', parsed.error.format());
+  process.exit(1);
 }
 
-export function shouldTrackInPostHog(environment: Environment): boolean {
-  return environment === 'production';
+export const env = parsed.data;
+
+export type Environment = typeof env.NODE_ENV;
+
+export function getEnvironment(): Environment {
+  return env.NODE_ENV;
 }
 
-export function isDev(c: Context): boolean {
-  return getEnvironment(c) === 'development';
+export function shouldTrackInPostHog(): boolean {
+  return env.NODE_ENV === 'production';
 }
 
-export function isTest(c: Context): boolean {
-  return getEnvironment(c) === 'testing';
+export function isDev(): boolean {
+  return env.NODE_ENV === 'development';
 }
 
-export function isProd(c: Context): boolean {
-  return getEnvironment(c) === 'production';
+export function isTest(): boolean {
+  return env.NODE_ENV === 'testing';
+}
+
+export function isProd(): boolean {
+  return env.NODE_ENV === 'production';
 }

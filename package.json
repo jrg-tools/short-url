@@ -1,36 +1,45 @@
 {
   "name": "short-url",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0",
+    "dev": "bun run --hot src/index.ts",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "db:makemigration": "DATABASE_URL=$env.DATABASE_URL_PROD DATABASE_TOKEN=$env.DATABASE_TOKEN_PROD drizzle-kit generate --config=./db/short-url.drizzle.config.ts",
-    "db:migrate": "DATABASE_URL=$env.DATABASE_URL_PROD DATABASE_TOKEN=$env.DATABASE_TOKEN_PROD drizzle-kit migrate --config=./db/short-url.drizzle.config.ts",
-    "db:push": "drizzle-kit push --config=./db/short-url.drizzle.config.ts",
-    "db:prod:push": "DATABASE_URL=$env.DATABASE_URL_PROD DATABASE_TOKEN=$env.DATABASE_TOKEN_PROD drizzle-kit push --config=./db/short-url.drizzle.config.ts",
-    "db:start": "turso dev --db-file .out/local-short-url.sqlite3",
-    "db:dump": "turso db shell short-url .dump > .out/dump.sql",
+    "db:setup": "mkdir -p .out && touch .out/local-core.sqlite3",
+    "db:makemigration": "dotenv -e .env.production -- drizzle-kit generate --config=./db/core.drizzle.config.ts",
+    "db:migrate": "dotenv -e .dev.vars -- drizzle-kit push --config=./db/core.drizzle.config.ts",
+    "db:prod:migrate": "dotenv -e .env.production -- drizzle-kit migrate --config=./db/core.drizzle.config.ts",
+    "db:start": "turso dev --db-file .out/local-core.sqlite3",
     "db:populate": "turso db shell http://127.0.0.1:8080 < .out/dump.sql",
     "format": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore .",
-    "deploy": "wrangler deploy --minify"
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir ./dist --target bun",
+    "health-check": "curl -f http://localhost:3000/health || exit 1",
+    "docker:build": "docker build -t hono-app .",
+    "docker:run": "docker run -p 3000:3000 hono-app",
+    "docker:build-optimized": "docker build --no-cache --pull -t hono-app:latest .",
+    "docker:analyze": "docker images hono-app --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}'"
   },
   "dependencies": {
-    "@clerk/backend": "^2.0.0",
-    "@hono/clerk-auth": "^2.0.0",
-    "@hono/zod-validator": "^0.7.0",
-    "@libsql/client": "^0.15.2",
+    "@clerk/backend": "^2.9.1",
+    "@hono/clerk-auth": "^2.0.1",
+    "@hono/zod-validator": "^0.7.2",
+    "@libsql/client": "^0.15.11",
     "crypto-js": "^4.2.0",
-    "drizzle-orm": "^0.44.1",
-    "hono": "^4.6.12",
-    "jose": "^6.0.11",
-    "posthog-node": "^5.1.1"
+    "drizzle-orm": "^0.44.4",
+    "hono": "^4.9.2",
+    "posthog-node": "^5.7.0",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.1.0",
-    "@cloudflare/workers-types": "^4.20241127.0",
+    "@antfu/eslint-config": "^4.19.0",
     "@types/crypto-js": "^4.2.2",
-    "drizzle-kit": "^0.31.1",
-    "typed-htmx": "^0.3.1",
-    "wrangler": "^4.6.0"
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "typed-htmx": "^0.3.1"
   }
 }

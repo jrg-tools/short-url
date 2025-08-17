@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from 'hono';
 import { getCookie, setCookie } from 'hono/cookie';
 import { SERVICE_NAME } from '@/lib/constants';
 import { getEnvironment } from '@/lib/env';
-import { PostHogService } from '@/lib/services/posthog';
+import { PostHogService } from '@/services/posthog';
 
 interface PostHogAnalyticsOptions {
   excludePaths?: string[];
@@ -21,7 +21,7 @@ export function posthogAnalytics(options: PostHogAnalyticsOptions = {}): Middlew
 
     // Initialize PostHog service if not already done
     if (!PostHogService.isInitialized()) {
-      PostHogService.initialize(c, options.forceTracking);
+      PostHogService.initialize(options.forceTracking);
     }
 
     // Skip tracking for excluded paths
@@ -36,7 +36,7 @@ export function posthogAnalytics(options: PostHogAnalyticsOptions = {}): Middlew
     const endTime = Date.now();
     const duration = endTime - startTime;
     const status = c.res.status;
-    const environment = getEnvironment(c);
+    const environment = getEnvironment();
 
     // Get user ID from Clerk auth or custom function
     const userId = c.get('userId') || 'anonymous';

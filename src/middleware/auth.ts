@@ -1,18 +1,17 @@
 import type { MiddlewareHandler } from 'hono';
-import type { Bindings, Variables } from '@/env.d';
+import type { Variables } from '@/env.d';
 import { getAuth } from '@hono/clerk-auth';
-import { env } from 'hono/adapter';
+import { env } from '@/lib/env';
 import { AuthenticationError } from '@/lib/errors/types';
 
 export function requireAuth(): MiddlewareHandler<{
-  Bindings: Bindings;
   Variables: Variables;
 }> {
   return async (c, next) => {
     const auth = getAuth(c);
     const userId = auth?.userId;
 
-    const { CLERK_ACCOUNTS_URL } = env(c);
+    const { CLERK_ACCOUNTS_URL } = env;
 
     if (!userId) {
       return c.redirect(`${CLERK_ACCOUNTS_URL}/sign-in?redirect_url=${encodeURIComponent(c.req.url)}`);

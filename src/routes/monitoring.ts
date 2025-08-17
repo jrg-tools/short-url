@@ -1,10 +1,9 @@
-import type { Bindings } from '@/env.d';
 import { Hono } from 'hono';
 
-const monitoring = new Hono<{ Bindings: Bindings }>()
+const monitoring = new Hono()
 
-  .get('/health', async (c) => {
-    return c.json({ status: 'ok' });
+  .get('/health', (c) => {
+    return c.json({ status: 'ok', timestamp: new Date().toISOString() }, 200);
   });
 
 export default monitoring;

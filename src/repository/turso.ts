@@ -1,31 +1,29 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
-import type { Context } from 'hono';
-import type { Bindings } from '@/env.d';
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-import { env } from 'hono/adapter';
+import { env } from '@/lib/env';
 
-// Cache database connections
-const dbCache = new Map<string, LibSQLDatabase>();
+let dbInstance: LibSQLDatabase | null = null;
 
-export function db(c: Context<{ Bindings: Bindings }>): LibSQLDatabase {
-  const { DATABASE_URL, DATABASE_TOKEN } = env(c);
+export function db(): LibSQLDatabase {
+  if (dbInstance)
+    return dbInstance;
 
-  // Use URL as cache key
-  const cacheKey = DATABASE_URL!;
+  const {
+    DATABASE_URL,
+    DATABASE_TOKEN,
+    DATABASE_PATH,
+    DATABASE_ENCRYPTION_KEY,
+  } = env;
 
-  if (dbCache.has(cacheKey)) {
-    return dbCache.get(cacheKey)!;
-  }
+  const client = createClient({
+    url: DATABASE_PATH,
+    authToken: DATABASE_TOKEN,
+    syncUrl: DATABASE_URL,
+    syncInterval: 60,
+    encryptionKey: DATABASE_ENCRYPTION_KEY,
+  });
 
-  const database = drizzle(
-    createClient({
-      url: DATABASE_URL!,
-      authToken: DATABASE_TOKEN,
-      // Add connection optimizations
-    }),
-  );
-
-  dbCache.set(cacheKey, database);
-  return database;
+  dbInstance = drizzle(client);
+  return dbInstance;
 }

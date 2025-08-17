@@ -1,23 +1,22 @@
-import type { Bindings } from '@/env.d';
 import { clerkMiddleware } from '@hono/clerk-auth';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { env } from 'hono/adapter';
 import { jsxRenderer } from 'hono/jsx-renderer';
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
 import { Layout } from '@/components/layout';
+import { env } from '@/lib/env';
 import { listSchema, originUrlSchema } from '@/lib/validator';
 import { requireAuth } from '@/middleware/auth';
 import { createShortUrl, getAllShortUrls, searchShortUrl } from '@/repository/actions';
 
 const TITLE = 'X - Short URL';
 
-const dashboard = new Hono<{ Bindings: Bindings }>()
+const dashboard = new Hono()
   .basePath('/dashboard')
   .use('*', clerkMiddleware())
   .use((c, next) => {
-    const { CLERK_PUBLISHABLE_KEY, CLERK_ACCOUNTS_URL } = env(c);
+    const { CLERK_PUBLISHABLE_KEY, CLERK_ACCOUNTS_URL } = env;
 
     if (!c.req.header('hx-request')) {
       return jsxRenderer(({ children }) => (
@@ -117,9 +116,10 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
 
   .post('/new', requireAuth(), zValidator('form', originUrlSchema), async (c) => {
     const { originUrl, theme } = c.req.valid('form');
-    const res = await createShortUrl(c, originUrl);
+    const res = await createShortUrl(originUrl);
+    const { DOMAIN } = env;
 
-    const shortUrl = `https://${c.env.DOMAIN}/${res?.Alias}`;
+    const shortUrl = `https://${DOMAIN}/${res?.Alias}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(shortUrl)}&size=160x160&bgcolor=${theme === 'dark' ? '0A0A0B' : 'FAFAFA'}&color=${theme === 'dark' ? '3f3f46' : 'd4d4d8'}`;
 
     return c.html(
@@ -128,7 +128,7 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
           <img src={qrUrl} alt="QR Code" class="mx-auto aspect-square w-[160px]" />
           <div class="text-yellow-400 font-semibold hover:text-yellow-400 transition">
             <span class="text-gray-600 dark:text-gray-300">
-              {c.env.DOMAIN}
+              {DOMAIN}
               /
             </span>
             <span class="font-bold text-lg">{res?.Alias}</span>
@@ -139,9 +139,10 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
   })
 
   .get('/list', requireAuth(), zValidator('query', listSchema), async (c) => {
+    const { DOMAIN } = env;
     const { q, page, size }: { q: string; page: number; size: number } = c.req.valid('query');
 
-    const { list, count } = !q ? await getAllShortUrls(c, page, size) : await searchShortUrl(c, q, page, size);
+    const { list, count } = !q ? await getAllShortUrls(page, size) : await searchShortUrl(q, page, size);
 
     const totalPages = Math.max(1, Math.ceil(count / size));
 
@@ -157,11 +158,11 @@ const dashboard = new Hono<{ Bindings: Bindings }>()
                   <div class="flex justify-between items-center px-4 py-3 dark:hover:bg-zinc-900  hover:bg-zinc-200/30 transition w-full" id={`item-${item.Alias}`}>
                     <button
                       class="flex flex-col min-w-0 w-full text-left cursor-pointer"
-                      onclick={`copyToClipboard('https://${c.env.DOMAIN}/${item.Alias}')`}
+                      onclick={`copyToClipboard('https://${DOMAIN}/${item.Alias}')`}
                     >
                       <div class="text-yellow-400 font-semibold text-sm">
                         <span class="text-zinc-700 dark:text-gray-300">
-                          {c.env.DOMAIN}
+                          {DOMAIN}
                           /
                         </span>
                         <span class="font-bold text-lg">{item.Alias}</span>

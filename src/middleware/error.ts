@@ -13,9 +13,9 @@ export interface ErrorHandlerOptions {
 
 export function createErrorHandler(options?: ErrorHandlerOptions) {
   return async (err: Error, c: Context) => {
-    const environment = getEnvironment(c);
-    const isProduction = isProd(c);
-    const isDevelopment = isDev(c);
+    const environment = getEnvironment();
+    const isProduction = isProd();
+    const isDevelopment = isDev();
 
     // Call custom error handler if provided
     if (options?.onError) {
@@ -42,7 +42,7 @@ export function createErrorHandler(options?: ErrorHandlerOptions) {
 
       const forceTracking = options?.forceTracking || false;
 
-      if (shouldTrack && (shouldTrackInPostHog(environment) || forceTracking || isDevelopment)) {
+      if (shouldTrack && (shouldTrackInPostHog() || forceTracking || isDevelopment)) {
         const tracker = new ErrorTracker(c, { forceTracking });
 
         try {
@@ -104,7 +104,7 @@ export function createErrorHandler(options?: ErrorHandlerOptions) {
       }
 
       const forceTracking = options?.forceTracking || false;
-      if (shouldTrackInPostHog(environment) || forceTracking || isDevelopment) {
+      if (shouldTrackInPostHog() || forceTracking || isDevelopment) {
         try {
           await tracker.trackError(unexpectedError, distinctId);
         }

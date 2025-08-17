@@ -1,8 +1,8 @@
 import type { Context } from 'hono';
 import type { TrackableError } from '@/lib/errors/types';
+import { SERVICE_NAME } from '@/lib/constants';
 import { getEnvironment } from '@/lib/env';
-import { SERVICE_NAME } from '../constants';
-import { PostHogService } from '../services/posthog';
+import { PostHogService } from '@/services/posthog';
 
 export class ErrorTracker {
   private environment: string;

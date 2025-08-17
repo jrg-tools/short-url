@@ -1,4 +1,4 @@
-import type { Bindings, Variables } from '@/env.d';
+import type { Variables } from '@/env.d';
 import { Hono } from 'hono';
 import { createErrorHandler } from '@/middleware/error';
 import dashboard from '@/routes/dashboard';
@@ -7,7 +7,6 @@ import operations from '@/routes/operations';
 import open from '@/routes/shortUrl';
 
 const app = new Hono<{
-  Bindings: Bindings;
   Variables: Variables;
 }>();
 
@@ -18,4 +17,8 @@ app.route('/', dashboard);
 app.route('/', monitoring);
 app.route('/', open);
 
-export default app;
+export default {
+  port: 3000,
+  hostname: '0.0.0.0',
+  fetch: app.fetch,
+};

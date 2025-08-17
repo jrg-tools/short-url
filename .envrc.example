@@ -1,5 +1,7 @@
 export DATABASE_URL=http://127.0.0.1:8080
 export DATABASE_TOKEN=
+export DATABASE_PATH=file:/app/data/replica.db
+export DATABASE_ENCRYPTION_KEY=<private-key>
 
 export PRIVATE_KEY=<private-key>
 
