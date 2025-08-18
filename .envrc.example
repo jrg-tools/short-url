@@ -1,15 +1,16 @@
-export DATABASE_URL=http://127.0.0.1:8080
+export DATABASE_URL=libsql://
 export DATABASE_TOKEN=
 export DATABASE_PATH=file:/app/data/replica.db
-export DATABASE_ENCRYPTION_KEY=<private-key>
+export DATABASE_ENCRYPTION_KEY=
 
-export PRIVATE_KEY=<private-key>
+export PRIVATE_KEY=
 
-export CLERK_SECRET_KEY=<clerk-secret-key>
-export CLERK_PUBLISHABLE_KEY=<clerk-publishable-key>
-export CLERK_ACCOUNTS_URL=https://<account_sec>.accounts.dev
+export CLERK_SECRET_KEY=sk_live_
+export CLERK_PUBLISHABLE_KEY=pk_live_
+export CLERK_ACCOUNTS_URL=https://
 
-export POSTHOG_PUBLIC_KEY=""
-export POSTHOG_HOST=""
+export POSTHOG_PUBLIC_KEY=phc_
+export POSTHOG_HOST=https://
 
-export DOMAIN=x.jrg.tools
+export DOMAIN=
+export NODE_ENV=production
