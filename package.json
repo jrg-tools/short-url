@@ -20,26 +20,26 @@
     "docker:analyze": "docker images hono-app --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}'"
   },
   "dependencies": {
-    "@clerk/backend": "^2.9.1",
+    "@clerk/backend": "^2.26.0",
     "@hono/clerk-auth": "^3.0.3",
-    "@hono/zod-validator": "^0.7.2",
-    "@libsql/client": "^0.15.11",
+    "@hono/zod-validator": "^0.7.5",
+    "@libsql/client": "^0.15.15",
     "crypto-js": "^4.2.0",
-    "drizzle-orm": "^0.44.4",
-    "hono": "^4.9.2",
-    "posthog-node": "^5.7.0",
-    "zod": "^4.0.17"
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.10.8",
+    "posthog-node": "^5.17.2",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.4.1",
     "@types/crypto-js": "^4.2.2",
-    "drizzle-kit": "^0.31.4",
-    "eslint": "^9.33.0",
+    "drizzle-kit": "^0.31.8",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "typed-htmx": "^0.3.1"
   }
 }
