@@ -20,7 +20,7 @@
     "docker:analyze": "docker images hono-app --format 'table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}'"
   },
   "dependencies": {
-    "@clerk/backend": "^2.26.0",
+    "@clerk/backend": "^3.2.4",
     "@hono/clerk-auth": "^3.0.3",
     "@hono/zod-validator": "^0.7.5",
     "@libsql/client": "^0.17.0",
