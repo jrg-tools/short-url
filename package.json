@@ -22,7 +22,7 @@
   "dependencies": {
     "@clerk/backend": "^3.2.4",
     "@hono/clerk-auth": "^3.0.3",
-    "@hono/zod-validator": "^0.7.5",
+    "@hono/zod-validator": "^0.8.0",
     "@libsql/client": "^0.17.0",
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.45.1",
